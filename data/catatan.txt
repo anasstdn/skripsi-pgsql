@@ -1,0 +1,12 @@
+php artisan code:models //create new model
+php artisan make:migration create_table_name_table
+php artisan db:seed --class=LaratrustSeeder
+php artisan db:seed --class=ContentSeeder
+
+raw data : data -> data_import.xlsx
+
+do the raw data migration first to raw_data table
+1. php artisan config:cache
+2. php artisan db:seed --class=ContentSeeder
+
+          <i class="pull-right"><img src="https://api.adorable.io/avatars/71/`+avatar+`.png" class="img-circle" alt="25x25" style="width: 25px; height: 25px;"></i>
