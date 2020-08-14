@@ -280,6 +280,9 @@
 
         <script src="{{asset('oneui/')}}/src/assets/js/plugins/flatpickr/flatpickr.min.js"></script>
 
+        <script src="{{asset('oneui/')}}/src/assets/apexcharts/apexcharts.js"></script>
+        <script src="{{asset('oneui/')}}/src/assets/apexcharts/apex-custom-script.js"></script>
+
         <script src="{{asset('oneui/')}}/src/assets/js/plugins/moment/moment.min.js"></script>
 
         <script>jQuery(function(){ One.helpers(['flatpickr']); });</script>
@@ -478,6 +481,55 @@ setInterval(GetClock,1000);
           }
       });
    }
+
+   function restore(url)
+   {
+    let toast = Swal.mixin({
+        buttonsStyling: false,
+        customClass: {
+            confirmButton: 'btn btn-success m-1',
+            cancelButton: 'btn btn-danger m-1',
+            input: 'form-control'
+        }
+    });
+
+    var token = $("meta[name='csrf-token']").attr("content");
+    toast.fire({
+        title: 'Restore Data!',
+        text: 'Apakah anda yakin?',
+        type: 'warning',
+        showCancelButton: true,
+        customClass: {
+            confirmButton: 'btn btn-danger m-1',
+            cancelButton: 'btn btn-secondary m-1'
+        },
+        confirmButtonText: 'Yes',
+        html: false,
+    })
+    .then(result => {
+      if (result.value) {
+          $.ajax({
+            url : url,
+            type: 'GET',
+            headers: {
+              'X-CSRF-TOKEN': token
+          },
+          success:function(){
+            toast.fire('Data berhasil direstore!', ' ', 'success');
+
+            setTimeout(function() {
+              location.reload();
+          }, 1000);
+        },
+    });
+      } else if (result.dismiss === 'cancel') {
+          toast.fire("Data batal direstore!");
+          setTimeout(function() {
+              location.reload();
+          }, 1000);
+      }
+  });
+}
 
    function nonaktifkan(url,status_aktif)
     {

@@ -57,7 +57,7 @@ class LoginController extends Controller
 
     protected function credentials(Request $request)
     {
-        return array_merge($request->only($this->username(), 'password'), ['status_aktif' => 1]);
+        return array_merge($request->only($this->username(), 'password'), ['status_aktif' => 1,'deleted_at' => null]);
     }
 
     public function authenticated(Request $request, $user)

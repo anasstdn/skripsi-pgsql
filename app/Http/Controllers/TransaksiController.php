@@ -116,7 +116,7 @@ class TransaksiController extends Controller
 		})
 		->addColumn('action', function ($data) {
 			$edit=url("transaksi/".$data->id)."/edit";
-			$delete=url("transaksi/".$data->id)."/delete";
+			$delete=url("transaksi/hapus/".$data->id);
 			$content = '';
 			$content.="<a href='#' onclick='show_modal(\"$edit\")' class='btn btn-primary btn-sm' data-original-title='Edit' title='Edit'><i class='fa fa-edit' aria-hidden='true'></i></a>";
 			$content.="<a href='#' onclick='hapus(\"$delete\")' class='btn btn-danger btn-sm' data-original-title='Hapus' title='Hapus'><i class='fa fa-trash' aria-hidden='true'></i></a>";
@@ -251,6 +251,15 @@ class TransaksiController extends Controller
     	DB::commit();
 
     	return redirect('/transaksi');
+    }
+
+    public function hapus($id)
+    {
+    	$data = RawDatum::find($id);
+    	$this->logDeletedActivity($data,'Delete data id='.$id.' di menu Transaksi','Transaksi','raw_data');
+    	$data->delete();
+
+    	message($data,'Data berhasil dihapus!','Data gagal dihapus!');
     }
 
     public function destroy(Request $request,$kode)

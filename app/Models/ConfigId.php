@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Cache;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\CacheUpdater;
+use Illuminate\Database\Eloquent\SoftDeletes; //add this line
 
 /**
  * Class ConfigId
@@ -27,6 +28,7 @@ use App\Traits\CacheUpdater;
 class ConfigId extends Model
 {
 	use CacheUpdater;
+	use SoftDeletes;
 	protected $table = 'config_ids';
 
 	protected $casts = [
@@ -44,6 +46,8 @@ class ConfigId extends Model
 		'config_value',
 		'description'
 	];
+
+	protected $dates =['deleted_at'];
 
 	public static function getValues($configName){
 		$configs = Cache::remember('config_ids_'.$configName,120, function() use($configName)

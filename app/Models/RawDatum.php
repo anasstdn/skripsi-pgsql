@@ -8,6 +8,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; //add this line
 
 /**
  * Class RawDatum
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class RawDatum extends Model
 {
+	use SoftDeletes;
 	protected $table = 'raw_data';
 
 	protected $casts = [
@@ -45,7 +47,8 @@ class RawDatum extends Model
 	];
 
 	protected $dates = [
-		'tgl_transaksi'
+		'tgl_transaksi',
+		'deleted_at',
 	];
 
 	protected $fillable = [

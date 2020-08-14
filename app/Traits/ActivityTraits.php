@@ -130,6 +130,40 @@ trait ActivityTraits
 		return true;
 	}
 
+	public function logRestoredActivity($list,$changeLogs,$menu,$table_name)
+	{
+		$agent = new Agent();
+		$browser = $agent->browser();
+		$version_browser = $agent->version($browser);
+
+		$platform = $agent->platform();
+		$version_platform = $agent->version($platform);
+
+		$updated_at = Carbon::now()->format('d/m/Y H:i:s');
+		$attributes = $this->unsetAttributes($list);
+
+		// $properties = [
+		// 	'attributes' => $attributes->toArray(),
+		// 	'type'=>'Delete',
+		// 	'description'=>'Hapus data '.$menu.' pada '.$updated_at.'',
+		// ];
+		$request['data']=$attributes->toArray();
+		$request['type']='Restore Data';
+		$request['description']='Restore '.$menu.' at '.$updated_at.'';
+		$request['menu']=$menu;
+		$request['table']=$table_name;
+		$request['device']=$platform.' '.$version_platform;
+		$request['browser']=$browser.' '.$version_browser;
+
+		$activity = activity()
+		->causedBy(\Auth::user())
+		->performedOn($list)
+		->withProperties(['attributes'=>$request])
+		->log($changeLogs);
+
+		return true;
+	}
+
 	public function logLoginDetails($user)
 	{
 		$agent = new Agent();

@@ -41,6 +41,7 @@ Route::prefix('user')->group(function() {
     Route::match(['get', 'post'],'/{id}/aktifkan','UserController@aktifkan');
 	Route::match(['get', 'post'],'/edit/{id}','UserController@edit');
 	Route::get('/{id}/delete', 'UserController@destroy');
+    Route::get('/hapus/{id}', 'UserController@hapus');
 });
 
 Route::prefix('activity-log')->group(function() {
@@ -201,6 +202,7 @@ Route::prefix('pengaturan')->group(function() {
     Route::match(['get', 'post'],'/check-username','PengaturanController@checkUsername');
     Route::match(['get', 'post'],'/check-email','PengaturanController@checkEmail');
     Route::match(['get', 'post'],'/check-password','PengaturanController@checkPassword');
+    Route::get('/hapus/{id}', 'PengaturanController@hapus');
     Route::get('/{id}/delete', 'PengaturanController@destroy');
 });
 
@@ -212,6 +214,7 @@ Route::prefix('transaksi')->group(function() {
     Route::match(['get', 'post'],'/{id}/edit','TransaksiController@edit');
     Route::match(['get','post'],'/update/{id}','TransaksiController@update');
     Route::get('/{id}/delete', 'TransaksiController@destroy');
+    Route::get('/hapus/{id}', 'TransaksiController@hapus');
 });
 
 Route::prefix('laporan')->group(function() {
@@ -225,4 +228,30 @@ Route::prefix('laporan')->group(function() {
     Route::match(['get', 'post'],'/{id}/edit','LaporanController@edit');
     Route::match(['get','post'],'/update/{id}','LaporanController@update');
     Route::get('/{id}/delete', 'LaporanController@destroy');
+});
+
+Route::prefix('grafik')->group(function() {
+    Route::get('/', 'GrafikController@index');
+    Route::get('/get-chart', 'GrafikController@getChart');
+});
+
+Route::prefix('recycle-bin')->group(function() {
+    Route::get('/', 'RecycleBinController@index');
+    Route::get('/load-config', 'RecycleBinController@loadConfig');
+    Route::get('/{id}/restore-config', 'RecycleBinController@restoreConfig');
+    Route::get('/{id}/delete-config', 'RecycleBinController@deleteConfig');
+    Route::get('/restore-all-config', 'RecycleBinController@restoreAllConfig');
+    Route::get('/delete-all-config', 'RecycleBinController@deleteAllConfig');
+
+    Route::get('/load-manajemen-pengguna', 'RecycleBinController@loadManajemenPengguna');
+    Route::get('/{id}/restore-manajemen-pengguna', 'RecycleBinController@restoreManajemenPengguna');
+    Route::get('/{id}/delete-manajemen-pengguna', 'RecycleBinController@deleteManajemenPengguna');
+    Route::get('/restore-all-manajemen-pengguna', 'RecycleBinController@restoreAllManajemenPengguna');
+    Route::get('/delete-all-manajemen-pengguna', 'RecycleBinController@deleteAllManajemenPengguna');
+
+    Route::get('/load-transaksi', 'RecycleBinController@loadTransaksi');
+    Route::get('/{id}/restore-transaksi', 'RecycleBinController@restoreTransaksi');
+    Route::get('/{id}/delete-transaksi', 'RecycleBinController@deleteTransaksi');
+    Route::get('/restore-all-transaksi', 'RecycleBinController@restoreAllTransaksi');
+    Route::get('/delete-all-transaksi', 'RecycleBinController@deleteAllTransaksi');
 });

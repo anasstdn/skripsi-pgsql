@@ -77,7 +77,7 @@ class UserController extends Controller
     	})
     	->addColumn('action', function ($data) use ($config) {
     		$edit=$data->id;
-    		$delete=url("user/".$data->id)."/delete";
+    		$delete=url("user/hapus/".$data->id);
     		$reset=url("user/".$data->id)."/reset";
     		$content = '';
     		if (!in_array($data->id, $config)) {
@@ -288,6 +288,15 @@ class UserController extends Controller
          message($reset,'Data berhasil disimpan!','Data gagal disimpan!');
      }
  }
+
+ public function hapus($id)
+ {
+    $data = User::find($id);
+    $this->logDeletedActivity($data,'Delete data id='.$id.' di menu Manajemen User','Mamajemen User','users');
+    $data->delete();
+
+    message($data,'Data berhasil dihapus!','Data gagal dihapus!');
+}
 
     public function destroy(Request $request,$kode)
     {

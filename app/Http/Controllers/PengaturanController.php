@@ -51,7 +51,7 @@ class PengaturanController extends Controller
 		})
 		->addColumn('action', function ($data) {
 			$edit=url("pengaturan/".$data->id)."/edit";
-			$delete=url("pengaturan/".$data->id)."/delete";
+			$delete=url("pengaturan/hapus/".$data->id);
 			$content = '';
 			$content .= "<a onclick='show_modal(\"$edit\")' style='color:white' class='btn btn-primary btn-sm' data-toggle='tooltip' data-original-title='Edit'><i class='fa fa-edit' aria-hidden='true'></i></a>";
 			$content .= " <a onclick='hapus(\"$delete\")' style='color:white' class='btn btn-danger btn-sm' data-toggle='tooltip' data-original-title='Hapus'><i class='fa fa-trash' aria-hidden='true'></i></a>";
@@ -281,6 +281,15 @@ class PengaturanController extends Controller
         DB::commit();
 
         return redirect('/pengaturan');
+	}
+
+	public function hapus($id)
+	{
+		$data = ConfigId::find($id);
+		$this->logDeletedActivity($data,'Delete data id='.$id.' di menu Config ID','Config ID','config_ids');
+		$data->delete();
+
+		message($data,'Data berhasil dihapus!','Data gagal dihapus!');
 	}
 
 	public function destroy(Request $request,$kode)

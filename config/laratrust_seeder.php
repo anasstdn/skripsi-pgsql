@@ -13,6 +13,9 @@ return [
             'transaksi-menu'                => 'r',
                 'transaksi'                 => 'r',
                 'laporan'                   => 'r',
+                'grafik'                    => 'r',
+            'recycle-bin-menu'              => 'r',
+                'recycle-bin'               => 'r',
         ],
         'superadministrator' => [
             'acl'                           => 'c,r,u,d',
@@ -25,6 +28,9 @@ return [
             'transaksi-menu'                => 'r',
                 'transaksi'                 => 'r',
                 'laporan'                   => 'r',
+                'grafik'                    => 'r',
+            'recycle-bin-menu'              => 'r',
+                'recycle-bin'               => 'r',
         ],
         // 'administrator' => [
         //     'users' => 'c,r,u,d',
@@ -35,6 +41,7 @@ return [
             'profile' => 'r,u',
             'transaksi-menu'                => 'r',
                 'laporan'                   => 'r',
+                'grafik'                    => 'r',
             // 'home-menu' => 'r'
         ],
         'front_office' => [

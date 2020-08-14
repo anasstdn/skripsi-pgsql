@@ -7,6 +7,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; //add this line
 
 /**
  * Class User
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class User extends Model
 {
+	use SoftDeletes;
 	protected $table = 'users';
 
 	protected $casts = [
@@ -54,6 +56,8 @@ class User extends Model
 		'remember_token',
 		'status_aktif'
 	];
+	
+	protected $dates =['deleted_at'];
 
 	public function roleUser(){
         return $this->hasOne('App\Models\RoleUser','user_id');

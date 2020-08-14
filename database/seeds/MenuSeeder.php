@@ -25,6 +25,7 @@ class MenuSeeder extends Seeder
         $this->menuPegawai();
         $this->menuAnggota();
         $this->menuTransaksi();
+        $this->menuRecycleBin();
     }
 
     private function menuHome()
@@ -497,5 +498,41 @@ class MenuSeeder extends Seeder
     );
         $submenu->save();
 
+        $permission = Permission::firstOrNew(array(
+            'name'=>'read-grafik',
+        ));
+        $permission->display_name = 'Read Grafik';
+        $permission->save();
+
+        $submenu = Menu::firstOrNew(array(
+            'name'=>'Grafik Transaksi',
+            'parent_id'=>$menu->id,
+            'permission_id'=>$permission->id,
+            'ordinal'=>2,
+            'parent_status'=>'N',
+            'url'=>'grafik',
+        )
+    );
+        $submenu->save();
+
+    }
+
+    private function menuRecycleBin()
+    {
+        $this->command->info('Menu Recycle Bin Seeder');
+        $permission = Permission::firstOrNew(array(
+            'name'=>'read-recycle-bin-menu'
+        ));
+        $permission->display_name = 'Read Recycle Bin Menus';
+        $permission->save();
+        $menu = Menu::firstOrNew(array(
+            'name'=>'Recycle Bin',
+            'permission_id'=>$permission->id,
+            'ordinal'=>1,
+            'parent_status'=>'N',
+            'url'=>'recycle-bin',
+        ));
+        $menu->icon = 'si-trash';
+        $menu->save();
     }
 }
