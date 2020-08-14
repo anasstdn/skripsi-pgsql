@@ -64,6 +64,42 @@
         <div class="block-content p-0 bg-body-light text-center">
             <div id="grafik_penjualan"></div>
         </div>
+        <div class="block-content">
+            <div class="row items-push text-center py-3">
+                <div class="col-6 col-xl-4">
+                    <i class="fa fa-wallet fa-2x text-muted"></i>
+                    <div class="text-muted mt-3">{{$total_transaksi_tahun_lalu->total}} Transaksi di tahun {{date('Y')-1}}</div>
+                </div>
+                <div class="col-6 col-xl-4">
+                    <i class="fa fa-wallet fa-2x text-muted"></i>
+                    <div class="text-muted mt-3">{{$total_transaksi_tahun_ini->total}} Transaksi di tahun {{date('Y')}}</div>
+                </div>
+                @php
+                $tahun_ini  =   $total_transaksi_tahun_ini->total;
+                $tahun_lalu =   $total_transaksi_tahun_lalu->total;
+
+                $total      =   $tahun_ini - $tahun_lalu;
+
+                if($total < 0)
+                {
+                    $arrow      =   'down';
+                    $percentage =   (abs($total) / $tahun_lalu) * 100;
+                    $sign       =   '-';
+                }
+                else
+                {
+                    $arrow      =   'up';
+                    $percentage =   ($total / $tahun_lalu) * 100;
+                    $sign       =   '+';
+                }
+
+                @endphp
+                <div class="col-6 col-xl-4">
+                    <i class="fa fa-angle-double-{{$arrow}} fa-2x text-muted"></i>
+                    <div class="text-muted mt-3">{{$sign}}{{number_format($percentage,2)}}% Dari tahun sebelumnya</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </div>
@@ -134,13 +170,12 @@
                     stops: [20, 100, 100, 100]
                 },
             },
-            colors: ['#2E93fA', '#66DA26'],
             grid:{
                 show: true,
                 borderColor: 'rgba(66, 59, 116, 0.15)',
             },
             yaxis: {
-                max: 500,                
+
             }
         };
 

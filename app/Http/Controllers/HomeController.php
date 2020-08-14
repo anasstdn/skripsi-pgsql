@@ -34,6 +34,14 @@ class HomeController extends Controller
     {
         $total_transaksi            =   RawDatum::select(\DB::raw('count(id) as total'))->first();
 
+        $total_transaksi_tahun_ini  =   RawDatum::select(\DB::raw('count(id) as total'))
+        ->whereYear('tgl_transaksi',date('Y'))
+        ->first();
+
+        $total_transaksi_tahun_lalu =   RawDatum::select(\DB::raw('count(id) as total'))
+        ->whereYear('tgl_transaksi',date('Y')-1)
+        ->first();
+
         $total_transaksi_bulan_ini  =   RawDatum::select(\DB::raw('count(id) as total'))
         ->whereMonth('tgl_transaksi',date('m'))
         ->whereYear('tgl_transaksi',date('Y'))
@@ -58,7 +66,7 @@ class HomeController extends Controller
 
         $bulan=$this->month_between_two_dates($date_from,$date_to);
 
-        return view('home',compact('total_transaksi','total_transaksi_bulan_ini','total_transaksi_minggu_ini','total_transaksi_hari_ini','bulan','penjualan_tahun_ini','penjualan_tahun_lalu'));
+        return view('home',compact('total_transaksi','total_transaksi_bulan_ini','total_transaksi_minggu_ini','total_transaksi_hari_ini','bulan','penjualan_tahun_ini','penjualan_tahun_lalu','total_transaksi_tahun_ini','total_transaksi_tahun_lalu'));
     }
 
     public static function month_between_two_dates($start_date, $end_date)
