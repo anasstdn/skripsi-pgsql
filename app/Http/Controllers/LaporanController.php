@@ -114,17 +114,16 @@ class LaporanController extends Controller
 
 	public function mingguan()
 	{
-			$GLOBALS['nomor']=\Request::input('start',1)+1;
+		$GLOBALS['nomor']=\Request::input('start',1)+1;
 		$tanggal=\Request::input('tanggal',null);
+		$tahun=date('Y',strtotime(\Request::input('tanggal')));
+		$minggu=strftime('%V', strtotime($tanggal));
 
-		$dataList = RawDatum::select('*')
-		->where(function($q) use($tanggal){
-			if(!empty($tanggal))
-			{
-				$q->whereDate('tgl_transaksi','=',date('Y-m-d',strtotime($tanggal)));
-			}
-		})
-		->orderby('tgl_transaksi','ASC')
+		$dataList = RawDatum::select(\DB::raw('sum(pasir) as pasir,sum(abu) as abu,sum(gendol) as gendol,sum(split2_3) as split2_3,sum(split1_2) as split1_2,sum(lpa) as lpa,tgl_transaksi'))
+		->where(\DB::raw('extract("week" from tgl_transaksi)'),'=',$minggu)
+		->whereYear('tgl_transaksi',$tahun)
+		->whereMonth('tgl_transaksi',date('m',strtotime($tanggal)))
+		->groupBy('tgl_transaksi')
 		->get();
 
 		if (request()->get('status') == 'trash') {
@@ -144,13 +143,6 @@ class LaporanController extends Controller
 		->addColumn('tgl_transaksi',function($data){
 			if(isset($data->tgl_transaksi)){
 				return date_indo(date('Y-m-d',strtotime($data->tgl_transaksi)));
-			}else{
-				return null;
-			}
-		})
-		->addColumn('no_nota',function($data){
-			if(isset($data->no_nota)){
-				return $data->no_nota;
 			}else{
 				return null;
 			}
@@ -278,7 +270,7 @@ class LaporanController extends Controller
 		$tahun=\Request::input('tahun');
 		$dataList=Schema::getColumnListing('raw_data');
 
-		$arr_to_rem=array('id','tgl_transaksi','no_nota','created_at','updated_at','campur');
+		$arr_to_rem=array('id','tgl_transaksi','no_nota','created_at','updated_at','campur','deleted_at');
 		$dataList=array_diff($dataList,$arr_to_rem);
 
 		if (request()->get('status') == 'trash') {

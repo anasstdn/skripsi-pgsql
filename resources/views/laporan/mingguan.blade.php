@@ -20,7 +20,6 @@
 					<th rowspan="2" class="align-middle">No</th>
 					<th rowspan="2" class="align-middle">Minggu Ke</th>
 					<th rowspan="2" class="align-middle">Tanggal Transaksi</th>
-					<th rowspan="2" class="align-middle">No Nota</th>
 					<th colspan="6" style="text-align: center">Jumlah (Meter Kubik)</th>
 				</tr>
 				<tr>
@@ -37,7 +36,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="4"></td>
+					<td colspan="3"></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -85,7 +84,6 @@
 				{data: 'nomor', name: 'nomor'},
 				{data: 'minggu', name: 'minggu'},
 				{data: 'tgl_transaksi', name: 'tgl_transaksi'},
-				{data: 'no_nota', name: 'no_nota'},
 				{
 					name: 'pasir',
 					data: 'pasir',
@@ -213,54 +211,54 @@
 
 
 					var pasir = api
-					.column( 4 )
+					.column( 3 )
 					.data()
 					.reduce( function (a, b) {
 						return intVal(a) + intVal(b);
 					}, 0 );
 
 					var gendol = api
-					.column( 5 )
+					.column( 4 )
 					.data()
 					.reduce( function (a, b) {
 						return intVal(a) + intVal(b);
 					}, 0 );
 
 					var abu = api
-					.column( 6 )
+					.column( 5 )
 					.data()
 					.reduce( function (a, b) {
 						return intVal(a) + intVal(b);
 					}, 0 );
 
 					var split2_3 = api
-					.column( 7 )
+					.column( 6 )
 					.data()
 					.reduce( function (a, b) {
 						return intVal(a) + intVal(b);
 					}, 0 );
 
 					var split1_2 = api
-					.column( 8 )
+					.column( 7 )
 					.data()
 					.reduce( function (a, b) {
 						return intVal(a) + intVal(b);
 					}, 0 );
 
 					var lpa = api
-					.column( 9 )
+					.column( 8 )
 					.data()
 					.reduce( function (a, b) {
 						return intVal(a) + intVal(b);
 					}, 0 );
 
 					$( api.column( 0 ).footer() ).html('<strong>TOTAL</strong>');
-					$( api.column( 4 ).footer() ).html('<strong>'+pasir+'</strong>');
-					$( api.column( 5 ).footer() ).html('<strong>'+gendol+'</strong>');
-					$( api.column( 6 ).footer() ).html('<strong>'+abu+'</strong>');
-					$( api.column( 7 ).footer() ).html('<strong>'+split2_3+'</strong>');
-					$( api.column( 8 ).footer() ).html('<strong>'+split1_2+'</strong>');
-					$( api.column( 9 ).footer() ).html('<strong>'+lpa+'</strong>');
+					$( api.column( 3 ).footer() ).html('<strong>'+pasir+'</strong>');
+					$( api.column( 4 ).footer() ).html('<strong>'+gendol+'</strong>');
+					$( api.column( 5 ).footer() ).html('<strong>'+abu+'</strong>');
+					$( api.column( 6 ).footer() ).html('<strong>'+split2_3+'</strong>');
+					$( api.column( 7 ).footer() ).html('<strong>'+split1_2+'</strong>');
+					$( api.column( 8 ).footer() ).html('<strong>'+lpa+'</strong>');
 				},
 			});
 

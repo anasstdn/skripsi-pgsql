@@ -255,3 +255,11 @@ Route::prefix('recycle-bin')->group(function() {
     Route::get('/restore-all-transaksi', 'RecycleBinController@restoreAllTransaksi');
     Route::get('/delete-all-transaksi', 'RecycleBinController@deleteAllTransaksi');
 });
+
+Route::prefix('peramalan')->group(function() {
+    Route::get('/', 'PeramalanController@index');
+    Route::match(['get','post'],'/cari', 'PeramalanController@cari');
+    Route::get('/detail-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses1');
+    Route::get('/detail-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes1');
+});
+

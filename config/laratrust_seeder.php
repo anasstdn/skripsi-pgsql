@@ -14,6 +14,7 @@ return [
                 'transaksi'                 => 'r',
                 'laporan'                   => 'r',
                 'grafik'                    => 'r',
+                'peramalan'                 => 'r',
             'recycle-bin-menu'              => 'r',
                 'recycle-bin'               => 'r',
         ],
@@ -29,6 +30,7 @@ return [
                 'transaksi'                 => 'r',
                 'laporan'                   => 'r',
                 'grafik'                    => 'r',
+                'peramalan'                 => 'r',
             'recycle-bin-menu'              => 'r',
                 'recycle-bin'               => 'r',
         ],
@@ -48,6 +50,7 @@ return [
             'profile' => 'r,u',
             'transaksi-menu'                => 'r',
                 'transaksi'                 => 'r',
+                'peramalan'                 => 'r',
         ],
     ],
     'permission_structure' => [

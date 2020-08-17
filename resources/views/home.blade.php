@@ -96,7 +96,7 @@
                 @endphp
                 <div class="col-6 col-xl-4">
                     <i class="fa fa-angle-double-{{$arrow}} fa-2x text-muted"></i>
-                    <div class="text-muted mt-3">{{$sign}}{{number_format($percentage,2)}}% Dari tahun sebelumnya</div>
+                    <div class="text-muted mt-3">{{$sign}}{{number_format($percentage,2)}}% dari tahun sebelumnya</div>
                 </div>
             </div>
         </div>
@@ -133,7 +133,7 @@
             },
             stroke: {
                 width: 4,   
-                curve: 'smooth',
+                curve: 'straight',
             },
             series: [
             {

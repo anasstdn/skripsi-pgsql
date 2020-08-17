@@ -25,6 +25,7 @@ class MenuSeeder extends Seeder
         $this->menuPegawai();
         $this->menuAnggota();
         $this->menuTransaksi();
+        $this->menuPeramalan();
         $this->menuRecycleBin();
     }
 
@@ -515,6 +516,25 @@ class MenuSeeder extends Seeder
     );
         $submenu->save();
 
+    }
+
+    private function menuPeramalan()
+    {
+        $this->command->info('Menu Peramalan Seeder');
+        $permission = Permission::firstOrNew(array(
+            'name'=>'read-peramalan'
+        ));
+        $permission->display_name = 'Read Peramalan Menus';
+        $permission->save();
+        $menu = Menu::firstOrNew(array(
+            'name'=>'Peramalan',
+            'permission_id'=>$permission->id,
+            'ordinal'=>1,
+            'parent_status'=>'N',
+            'url'=>'peramalan',
+        ));
+        $menu->icon = 'si-graph';
+        $menu->save();
     }
 
     private function menuRecycleBin()
