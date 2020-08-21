@@ -98,6 +98,11 @@
 						<div id="grafik_penjualan"></div>
 					</div>
 				</div>
+				<div class="row" style="margin-bottom: 0.2em">
+					<div class="col-md-12 text-right">
+						<a href="{{url('/peramalan')}}" class="btn btn-success">Kembali ke Cari</a>
+					</div>
+				</div>
 			</div>
 	</div>
 </div>

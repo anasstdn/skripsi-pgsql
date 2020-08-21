@@ -41,6 +41,11 @@ class PeramalanController extends Controller
 		$tanggal_akhir		=	$all_data['tanggal_akhir'];
 		$produk 			=	$all_data['produk'];
 
+		return redirect(url('peramalan/search/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir));
+	}
+
+	public function search($produk,$tanggal_awal,$tanggal_akhir)
+	{
 		$periode 			=	array();
 		$aktual		 		=	array();
 		$peramalan_arrses 	=	array();
@@ -53,8 +58,8 @@ class PeramalanController extends Controller
 		$pe_des 			=	0;
 
 
-		$arrses 			=	$this->forecastingArrses($all_data['tanggal_awal'],$all_data['tanggal_akhir'],$all_data['produk']);
-		$des 				= 	$this->forecastingDes($all_data['tanggal_awal'],$all_data['tanggal_akhir'],$all_data['produk']);
+		$arrses 			=	$this->forecastingArrses($tanggal_awal,$tanggal_akhir,$produk);
+		$des 				= 	$this->forecastingDes($tanggal_awal,$tanggal_akhir,$produk);
 
 		if(isset($arrses) && isset($des))
 		{
@@ -82,7 +87,7 @@ class PeramalanController extends Controller
 		}
 		else
 		{
-			message(false,'','Tidak ditemukan transaksi penjualan antara periode '.$all_data['tanggal_awal'].' sampai '.$all_data['tanggal_akhir']);
+			message(false,'','Tidak ditemukan transaksi penjualan antara periode '.$tanggal_awal.' sampai '.$tanggal_akhir);
 
 			return redirect('/peramalan');
 		}
@@ -555,11 +560,11 @@ class PeramalanController extends Controller
 		$date_from=date('Y-m-d',strtotime($date_from));
 		$date_to=date('Y-m-d',strtotime($date_to));
 
-		$data_penjualan=RawDatum::select(DB::raw('WEEK(tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+		$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
 		->where('tgl_transaksi','>=',$date_from)
 		->where('tgl_transaksi','<=',$date_to)
-        // ->groupby('tgl_transaksi')
-		->groupBy(DB::raw('WEEK(tgl_transaksi)'))
+    	// ->groupby('tgl_transaksi')
+		->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
 		->get();
 
 		$minggu=$this->week_between_two_dates($date_from,$date_to);
@@ -575,9 +580,9 @@ class PeramalanController extends Controller
 		$E = array();
 		$AE = array();
 		$alpha = array();
-		$beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+		// $beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
 
-        // $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
+        $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
 		$PE = array();
 		$MAPE = array();
 		$MAD=array();
@@ -619,7 +624,7 @@ class PeramalanController extends Controller
 		$bestBetaIndex = array_search(min($MAPE), $MAPE);
         // dd($bestBetaIndex);
 
-		return $this->view('detail-arrses',compact('MAPE','bestBetaIndex','beta','MADTotal'));
+		return view('peramalan.mape-arrses',compact('MAPE','bestBetaIndex','beta','MADTotal','produk','date_from','date_to'));
 	}
 
 	public function detailArrses1(Request $request, $produk, $date_from, $date_to)
@@ -668,7 +673,46 @@ class PeramalanController extends Controller
 
 	public function detailDes1(Request $request, $produk, $date_from, $date_to)
 	{
-		dd('aaaa');
+		$tanggal_awal		=	$date_from;
+		$tanggal_akhir		=	$date_to;
+		$produk 			=	$produk;
+
+		$periode 			=	array();
+		$aktual		 		=	array();
+		$peramalan_arrses 	=	array();
+		$peramalan_des 		=	array();
+
+		$mad_arrses			=	0;
+		$pe_arrses 			=	0;
+
+		$mad_des			=	0;
+		$pe_des 			=	0;
+
+
+		$des 				=	$this->forecastingDes($tanggal_awal,$tanggal_akhir,$produk);
+
+		if(isset($des))
+		{
+			$length_des		=	count($des) - 1;
+
+			foreach($des as $key	=> $val)
+			{
+				array_push($periode,$val['periode']);
+				array_push($aktual,$val['aktual']);
+				array_push($peramalan_des,$val['peramalan']);
+
+				$mad_des	+=	$val['MAD'];
+				$pe_des 	+=	$val['PE'];
+			}
+
+			return view('peramalan.detail-des',compact('des','periode','aktual','peramalan_des','length_des','mad_des','pe_des','tanggal_awal','tanggal_akhir','produk'));
+		}
+		else
+		{
+			message(false,'','Tidak ditemukan transaksi penjualan antara periode '.$tanggal_awal.' sampai '.$tanggal_akhir);
+
+			return redirect('/peramalan');
+		}
 	}
 
 	public function detailDes(Request $request, $produk, $date_from, $date_to)
@@ -676,11 +720,11 @@ class PeramalanController extends Controller
 		$date_from=date('Y-m-d',strtotime($date_from));
 		$date_to=date('Y-m-d',strtotime($date_to));
 
-		$data_penjualan=RawDatum::select(DB::raw('WEEK(tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+		$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
 		->where('tgl_transaksi','>=',$date_from)
 		->where('tgl_transaksi','<=',$date_to)
-        // ->groupby('tgl_transaksi')
-		->groupBy(DB::raw('WEEK(tgl_transaksi)'))
+    	// ->groupby('tgl_transaksi')
+		->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
 		->get();
 
 		$minggu=$this->week_between_two_dates($date_from,$date_to);
@@ -734,12 +778,13 @@ class PeramalanController extends Controller
 					$PE[$i][$j+1]=0;
 				}
 			}
-			$MAPE[$i] = array_sum($PE[$i])/(count($periode)+1);
+		
+			$MAPE[$i] = array_sum($PE[$i])/(count($periode));
 			$MADTotal[$i]=array_sum($MAD[$i])/(count($periode));
 		}
 
 		$bestAlphaIndex = array_search(min($MAPE), $MAPE);
         // dd($bestAlphaIndex);
-		return $this->view('detail-des',compact('MAPE','bestAlphaIndex','alpha','MADTotal'));
+		return view('peramalan.mape-des',compact('MAPE','bestAlphaIndex','alpha','MADTotal','produk','date_from','date_to'));
 	}
 }

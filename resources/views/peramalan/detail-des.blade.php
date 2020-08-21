@@ -22,7 +22,7 @@
 		</div>
 			<div class="block-content block-content-full">
 				<!-- DataTables init on table by adding .js-dataTable-full-pagination class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _es6/pages/be_tables_datatables.js -->
-				<h4 class="font-w400">Peramalan Produk {{column_name($produk)}} dengan Metode ARRSES</h4>
+				<h4 class="font-w400">Peramalan Produk {{column_name($produk)}} dengan Metode DES Brown</h4>
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="table-responsive">
@@ -30,11 +30,12 @@
 							<thead class="thead-dark">
 								<tr>
 									<th>Minggu</th>
-									<th>Aktual</th>
-									<th>Nilai Peramalan</th>
-									<th>Galat</th>
-									<th>Galat Pemulusan</th>
-									<th>Galat Pemulusan Absolut</th>
+									<th>Nilai Aktual</th>
+									<th>Nilai Peramalan (at + bt)</th>
+									<th>Smoothing Pertama (St')</th>
+									<th>Smoothing Kedua (St'')</th>
+									<th>Konstanta (at)</th>
+									<th>Slope (bt)</th>
 									<th>Alpha</th>
 									<th>Deviasi Absolut (MAD)</th>
 									<th>Prosentase Error (MAPE)</th>
@@ -46,42 +47,43 @@
 								<tr>
 									<td>{{$periode[$key]}}</td>
 									<td>{{$val}}</td>
-									<td>{{$peramalan_arrses[$key]}}</td>
-									<td>{{$arrses[$key]['galat']}}</td>
-									<td>{{$arrses[$key]['galat_pemulusan']}}</td>
-									<td>{{$arrses[$key]['galat_pemulusan_absolut']}}</td>
-									<td>{{$arrses[$key]['alpha']}}</td>
-									<td>{{$arrses[$key]['MAD']}}</td>
-									<td>{{$arrses[$key]['percentage_error']}}</td>
+									<td>{{$peramalan_des[$key]}}</td>
+									<td>{{$des[$key]['s1']}}</td>
+									<td>{{$des[$key]['s2']}}</td>
+									<td>{{$des[$key]['at']}}</td>
+									<td>{{$des[$key]['bt']}}</td>
+									<td>{{$des[$key]['alpha']}}</td>
+									<td>{{$des[$key]['MAD']}}</td>
+									<td>{{$des[$key]['PE']}}</td>
 								</tr>
 								@endforeach
 								@endif
 							</tbody>
 							<tfoot style="font-weight: bold">
 								<tr>
-									<td colspan="7">Jumlah</td>
-									<td>{{$mad_arrses}}</td>
-									<td>{{$pe_arrses}}</td>
+									<td colspan="8">Jumlah</td>
+									<td>{{$mad_des}}</td>
+									<td>{{$pe_des}}</td>
 								</tr>
 								<tr>
-									<td colspan="7">Nilai</td>
-									<td>{{number_format(($mad_arrses / $length_arrses),2)}}</td>
-									<td>{{number_format(($pe_arrses / $length_arrses),2)}} %</td>
+									<td colspan="8">Nilai</td>
+									<td>{{number_format(($mad_des / $length_des),2)}}</td>
+									<td>{{number_format(($pe_des / $length_des),2)}} %</td>
 								</tr>
 								<tr>
-									<td colspan="7">Kriteria Nilai MAPE</td>
+									<td colspan="8">Kriteria Nilai MAPE</td>
 									<td>
-										@if(number_format(($pe_arrses / $length_arrses),2) < 10)
+										@if(number_format(($pe_des / $length_des),2) < 10)
 										<span class="badge badge-primary" style="background-color: #006400">SANGAT BAIK</span>
-										@elseif(number_format(($pe_arrses / $length_arrses),2) >= 10 && number_format(($pe_arrses / $length_arrses),2) <= 20)
+										@elseif(number_format(($pe_des / $length_des),2) >= 10 && number_format(($pe_des / $length_des),2) <= 20)
 										<span class="badge badge-primary" style="background-color: #00ff00">BAIK</span>
-										@elseif(number_format(($pe_arrses / $length_arrses),2) > 20 && number_format(($pe_arrses / $length_arrses),2) <= 50)
+										@elseif(number_format(($pe_des / $length_des),2) > 20 && number_format(($pe_des / $length_des),2) <= 50)
 										<span class="badge badge-primary" style="background-color: #ffd700;color:black">CUKUP</span>
-										@elseif(number_format(($pe_arrses / $length_arrses),2) > 50)
+										@elseif(number_format(($pe_des / $length_des),2) > 50)
 										<span class="badge badge-primary" style="background-color: #8b0000">BURUK</span>
 										@endif
 									</td>
-									<td><a href="{{url('peramalan/mape-arrses/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-info">Detail</a></td>
+									<td><a href="{{url('peramalan/mape-des/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-info">Detail</a></td>
 								</tr>
 							</tfoot>
 						</table>
@@ -89,7 +91,7 @@
 				</div>
 				</div>
 				<br/>
-				<h4 class="font-w400">Grafik Peramalan Produk {{column_name($produk)}} dengan Metode ARRSES</h4>
+				<h4 class="font-w400">Grafik Peramalan Produk {{column_name($produk)}} dengan Metode DES Brown</h4>
 				<div class="row">
 					<div class="col-lg-12">
 						<div id="grafik_penjualan"></div>
@@ -142,8 +144,8 @@
                 data: <?=json_encode($aktual)?>,
             },
             {
-                name: 'ARRSES',
-                data: <?=json_encode($peramalan_arrses)?>,
+                name: 'DES Brown',
+                data: <?=json_encode($peramalan_des)?>,
             },
             ],
 

@@ -259,7 +259,10 @@ Route::prefix('recycle-bin')->group(function() {
 Route::prefix('peramalan')->group(function() {
     Route::get('/', 'PeramalanController@index');
     Route::match(['get','post'],'/cari', 'PeramalanController@cari');
+    Route::get('/search/{produk}/{tanggal_awal}/{tanggal_akhir}', 'PeramalanController@search');
     Route::get('/detail-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses1');
+    Route::get('/mape-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses');
     Route::get('/detail-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes1');
+    Route::get('/mape-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes');
 });
 
