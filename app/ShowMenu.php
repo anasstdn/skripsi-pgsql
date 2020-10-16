@@ -76,20 +76,30 @@ class ShowMenu
   //   return $html;
   // }
 
-  public function getHtmlMenu($menu){
-    $hasSub = ($menu->parent_status == 'Y')?'class="nav-main-link nav-main-link-submenu" data-toggle="submenu" aria-haspopup="true" aria-expanded="false"':'class="nav-main-link"';
+public function getHtmlMenu($menu){
+    $hasSub = ($menu->parent_status == 'Y')?'class="has-sub nav-item"':'class="nav-item"';
     $menuUrl = ($menu->parent_status == 'Y')?'#':url($menu->url);
-    $html ='<li class="nav-main-item"><a '.$hasSub.' href="'.$menuUrl.'">';
+    if ($menu->ordinal !== 1) {
+      $html ='<li><a href="'.$menuUrl.'">';
+    }
+    else
+    {
+      $html ='<li><a '.$hasSub.' href="'.$menuUrl.'">';
+    }
     if ($menu->ordinal == 1) {
-      $html .='<i class="nav-main-link-icon si '.$menu->icon.'"></i>';
+      $html .='<i class="'.$menu->icon.'"></i>';
     }
     // $html .=__($menu->name);
     // if ($menu->parent_status == 'Y') {
-      $html .= '<span class="nav-main-link-name">'.$menu->name.'</span>';
+      $html .= '<span data-i18n="" class="menu-title">'.$menu->name.'</span>';
+
+      if ($menu->ordinal == 1) {
+      $html .='<i class="fa fa-angle-left pull-right"></i>';
+    }
     // }
     $html .='</a>';
     if ($menu->parent_status == 'Y') {
-      $html .= '<ul class="nav-main-submenu">';
+      $html .= '<ul class="menu-content">';
     }
 
     return $html;
