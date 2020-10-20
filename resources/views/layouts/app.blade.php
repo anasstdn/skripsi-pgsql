@@ -611,7 +611,7 @@ setInterval(GetClock,1000);
     function loadHandler(event) {
         $("#status").html('Load Completed');
         setTimeout(function(){
-          $('.ajax-loader').fadeOut()
+          $('.ajax-loader').fadeOut();
           $("#percent").html("0%");
           $(".progress-bar").css("width", "100%");
       }, 500);
