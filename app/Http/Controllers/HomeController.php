@@ -86,70 +86,91 @@ class HomeController extends Controller
     {
         $total_transaksi=array();
 
-        $data_penjualan=RawDatum::select(DB::raw('
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 1 THEN 1
-            ELSE 0
-            END
-            ) AS "Jan",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 2 THEN 1
-            ELSE 0
-            END
-            ) AS "Feb",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 3 THEN 1
-            ELSE 0
-            END
-            ) AS "Mar",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 4 THEN 1
-            ELSE 0
-            END
-            ) AS "Apr",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 5 THEN 1
-            ELSE 0
-            END
-            ) AS "May",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 6 THEN 1
-            ELSE 0
-            END
-            ) AS "Jun",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 7 THEN 1
-            ELSE 0
-            END
-            ) AS "Jul",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 8 THEN 1
-            ELSE 0
-            END
-            ) AS "Aug",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 9 THEN 1
-            ELSE 0
-            END
-            ) AS "Sep",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 10 THEN 1
-            ELSE 0
-            END
-            ) AS "Oct",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 11 THEN 1
-            ELSE 0
-            END
-            ) AS "Nov",
-            SUM (CASE
-            WHEN EXTRACT(MONTH FROM tgl_transaksi) = 12 THEN 1
-            ELSE 0
-            END
-            ) AS "Dec"
-            '))
-        ->whereYear('tgl_transaksi',$tahun)
-        ->first();
+        if (env('DB_CONNECTION') == 'pgsql') {
+            $data_penjualan=RawDatum::select(DB::raw('
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 1 THEN 1
+                ELSE 0
+                END
+                ) AS "Jan",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 2 THEN 1
+                ELSE 0
+                END
+                ) AS "Feb",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 3 THEN 1
+                ELSE 0
+                END
+                ) AS "Mar",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 4 THEN 1
+                ELSE 0
+                END
+                ) AS "Apr",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 5 THEN 1
+                ELSE 0
+                END
+                ) AS "May",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 6 THEN 1
+                ELSE 0
+                END
+                ) AS "Jun",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 7 THEN 1
+                ELSE 0
+                END
+                ) AS "Jul",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 8 THEN 1
+                ELSE 0
+                END
+                ) AS "Aug",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 9 THEN 1
+                ELSE 0
+                END
+                ) AS "Sep",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 10 THEN 1
+                ELSE 0
+                END
+                ) AS "Oct",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 11 THEN 1
+                ELSE 0
+                END
+                ) AS "Nov",
+                SUM (CASE
+                WHEN EXTRACT(MONTH FROM tgl_transaksi) = 12 THEN 1
+                ELSE 0
+                END
+                ) AS "Dec"
+                '))
+            ->whereYear('tgl_transaksi',$tahun)
+            ->first();
+        }
+        else
+        {
+            $data_penjualan=RawDatum::select(DB::raw('
+                SUM(if(MONTH(tgl_transaksi) = 1, 1,0)) AS "Jan",
+                SUM(if(MONTH(tgl_transaksi) = 2, 1,0)) AS "Feb",
+                SUM(if(MONTH(tgl_transaksi) = 3, 1,0)) AS "Mar",
+                SUM(if(MONTH(tgl_transaksi) = 4, 1,0)) AS "Apr",
+                SUM(if(MONTH(tgl_transaksi) = 5, 1,0)) AS "May",
+                SUM(if(MONTH(tgl_transaksi) = 6, 1,0)) AS "Jun",
+                SUM(if(MONTH(tgl_transaksi) = 7, 1,0)) AS "Jul",
+                SUM(if(MONTH(tgl_transaksi) = 8, 1,0)) AS "Aug",
+                SUM(if(MONTH(tgl_transaksi) = 9, 1,0)) AS "Sep",
+                SUM(if(MONTH(tgl_transaksi) = 10, 1,0)) AS "Oct",
+                SUM(if(MONTH(tgl_transaksi) = 11, 1,0)) AS "Nov",
+                SUM(if(MONTH(tgl_transaksi) = 12, 1,0)) AS "Dec"
+                '))
+            ->whereYear('tgl_transaksi',$tahun)
+            ->first();
+        }
 
         array_push($total_transaksi,$data_penjualan->Jan);
         array_push($total_transaksi,$data_penjualan->Feb);

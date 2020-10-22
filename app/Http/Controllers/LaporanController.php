@@ -120,7 +120,15 @@ class LaporanController extends Controller
 		$minggu=strftime('%V', strtotime($tanggal));
 
 		$dataList = RawDatum::select(\DB::raw('sum(pasir) as pasir,sum(abu) as abu,sum(gendol) as gendol,sum(split2_3) as split2_3,sum(split1_2) as split1_2,sum(lpa) as lpa,tgl_transaksi'))
-		->where(\DB::raw('extract("week" from tgl_transaksi)'),'=',$minggu)
+		->where(function($q) use($minggu){
+			if (env('DB_CONNECTION') == 'pgsql') {
+				$q->where(\DB::raw('extract("week" from tgl_transaksi)'),'=',$minggu);
+			}
+			else
+			{
+				$q->where(\DB::raw('EXTRACT(WEEK FROM tgl_transaksi)'),'=',$minggu);
+			}
+		})
 		->whereYear('tgl_transaksi',$tahun)
 		->whereMonth('tgl_transaksi',date('m',strtotime($tanggal)))
 		->groupBy('tgl_transaksi')

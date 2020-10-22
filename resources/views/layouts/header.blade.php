@@ -59,7 +59,7 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-right p-0 border-0 font-size-sm" aria-labelledby="page-header-user-dropdown">
                                 <div class="p-3 text-center bg-success">
-                                    <img class="img-avatar img-avatar48 img-avatar-thumb" src="assets/media/avatars/avatar10.jpg" alt="">
+                                    <img class="img-avatar img-avatar48 img-avatar-thumb" src="{{asset('oneui/')}}/src/assets/media/avatars/avatar10.jpg" alt="">
                                 </div>
                                 <div class="p-2">
                                     <h5 class="dropdown-header text-uppercase">Pengaturan Pengguna</h5>

@@ -24,7 +24,13 @@ class ImportDataSeeder extends Seeder
     {
     	$this->command->info('Delete Data Penjualan');
     	DB::table('raw_data')->delete();
-    	DB::statement("ALTER SEQUENCE raw_data_id_seq RESTART WITH 1");
+        if (env('DB_CONNECTION') == 'pgsql') {
+           DB::statement("ALTER SEQUENCE raw_data_id_seq RESTART WITH 1");
+       }
+       else
+       {
+        DB::statement("ALTER TABLE raw_data AUTO_INCREMENT = 1");
+        }
     	$fileName = 'data/data_import.xlsx';
     	$data = Excel::import(new RawDataImport, $fileName);
  

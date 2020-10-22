@@ -14,6 +14,37 @@
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+Route::get('/clear-cache', function () {
+    $clearcache = Artisan::call('cache:clear');
+    echo "Cache cleared<br>";
+
+    $clearview = Artisan::call('view:clear');
+    echo "View cleared<br>";
+
+    $clearconfig = Artisan::call('config:cache');
+    echo "Config cleared<br>";
+
+    $clearconfig = Artisan::call('config:clear');
+    echo "Config cleared<br>";
+
+    $clearconfig = Artisan::call('storage:link');
+    echo "Storage Link<br>";
+});
+
+Route::get('/migrate', function () {
+    $migrate = Artisan::call('migrate');
+    echo "Migrate<br>";
+});
+
+Route::get('/seeding', function () {
+    $migrate = Artisan::call('db:seed');
+    echo "Seeding Data<br>";
+});
+
+Route::get('/seeding-raw', function () {
+    $migrate = Artisan::call('db:seed --class=ImportDataSeeder');
+    echo "Seeding Data<br>";
+});
 
 Route::get('/', function () {
     // return view('welcome');

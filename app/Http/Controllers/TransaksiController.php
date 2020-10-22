@@ -132,7 +132,7 @@ class TransaksiController extends Controller
         $mode='create';
         $url=route('transaksi.store');
 		$this->menuAccess(\Auth::user(),'Transaksi Penjualan');
-        return view('transaksi.popup',compact('title','mode','id','url'));
+        return view('transaksi.popup',compact('title','mode','url'));
 	}
 
 	public function store(Request $request)

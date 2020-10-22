@@ -61,7 +61,7 @@ class PeramalanController extends Controller
 		$arrses 			=	$this->forecastingArrses($tanggal_awal,$tanggal_akhir,$produk);
 		$des 				= 	$this->forecastingDes($tanggal_awal,$tanggal_akhir,$produk);
 
-		if(isset($arrses) && isset($des))
+		if((isset($arrses) && !empty($arrses)) && (isset($des) && !empty($des)))
 		{
 			$length_arrses	=	count($arrses) - 1;
 			$length_des		=	count($des)	- 1;
@@ -99,12 +99,23 @@ class PeramalanController extends Controller
 		$date_from 	=	date('Y-m-d',strtotime($tanggal_awal));
 		$date_to 	=	date('Y-m-d',strtotime($tanggal_akhir));  
 
-		$data_penjualan 	=	RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
-		->where('tgl_transaksi','>=',$date_from)
-		->where('tgl_transaksi','<=',$date_to)
+		if (env('DB_CONNECTION') == 'pgsql') {
+			$data_penjualan 	=	RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
-		->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
-		->get();
+			->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
+			->get();
+		}
+		else
+		{
+			$data_penjualan 	=	RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
+    	// ->groupby('tgl_transaksi')
+			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->get();
+		}
 
 		if(isset($data_penjualan) && !$data_penjualan->isEmpty()){
 			$minggu=$this->week_between_two_dates($date_from,$date_to);
@@ -213,12 +224,23 @@ class PeramalanController extends Controller
 		$date_from 		=	date('Y-m-d',strtotime($tanggal_awal));
 		$date_to 		=	date('Y-m-d',strtotime($tanggal_akhir));  
 		
-		$data_penjualan =	RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
-		->where('tgl_transaksi','>=',$date_from)
-		->where('tgl_transaksi','<=',$date_to)
+		if (env('DB_CONNECTION') == 'pgsql') {
+			$data_penjualan =	RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
         // ->groupby('tgl_transaksi')
-		->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
-		->get();
+			->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
+			->get();
+		}
+		else
+		{
+			$data_penjualan =	RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
+        // ->groupby('tgl_transaksi')
+			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->get();
+		}
         // dd($data_penjualan);
 
 		if(isset($data_penjualan) && !$data_penjualan->isEmpty()){
@@ -560,12 +582,23 @@ class PeramalanController extends Controller
 		$date_from=date('Y-m-d',strtotime($date_from));
 		$date_to=date('Y-m-d',strtotime($date_to));
 
-		$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
-		->where('tgl_transaksi','>=',$date_from)
-		->where('tgl_transaksi','<=',$date_to)
+		if (env('DB_CONNECTION') == 'pgsql') {
+			$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
-		->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
-		->get();
+			->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
+			->get();
+		}
+		else
+		{
+			$data_penjualan=RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
+    	// ->groupby('tgl_transaksi')
+			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->get();
+		}
 
 		$minggu=$this->week_between_two_dates($date_from,$date_to);
         // dd($minggu);
@@ -720,12 +753,23 @@ class PeramalanController extends Controller
 		$date_from=date('Y-m-d',strtotime($date_from));
 		$date_to=date('Y-m-d',strtotime($date_to));
 
-		$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
-		->where('tgl_transaksi','>=',$date_from)
-		->where('tgl_transaksi','<=',$date_to)
+		if (env('DB_CONNECTION') == 'pgsql') {
+			$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
-		->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
-		->get();
+			->groupBy(DB::raw('extract("week" from tgl_transaksi),extract("year" from tgl_transaksi)'))
+			->get();
+		}
+		else
+		{
+			$data_penjualan=RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			->where('tgl_transaksi','>=',$date_from)
+			->where('tgl_transaksi','<=',$date_to)
+    	// ->groupby('tgl_transaksi')
+			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->get();
+		}
 
 		$minggu=$this->week_between_two_dates($date_from,$date_to);
         // dd($minggu);

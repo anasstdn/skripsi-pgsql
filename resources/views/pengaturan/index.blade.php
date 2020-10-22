@@ -184,7 +184,7 @@ else
 				'website_ps': {
 					required: false,
 					minlength: 1,
-					url:true,
+					url:false,
 				},
 				 'tgl_berdiri_ps': {
                     required: true,

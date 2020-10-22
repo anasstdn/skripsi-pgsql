@@ -73,7 +73,7 @@ class PengaturanController extends Controller
 				'email_ps'		=> 'required',
 				'telp_ps'		=> 'required',
 				'tgl_berdiri_ps'=> 'required',
-				'flag_aktif'	=> 'required',
+				// 'flag_aktif'	=> 'required',
 			]);
 
 			if (!$validation->passes()){

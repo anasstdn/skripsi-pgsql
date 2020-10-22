@@ -93,9 +93,8 @@ class UserController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $data=User::select(\DB::raw('users.*,role_user.role_id,profile.nama_depan,profile.nama_belakang'))
+        $data=User::select(\DB::raw('users.*,role_user.role_id'))
         ->join('role_user','role_user.user_id','=','users.id')
-        ->leftjoin('profile','profile.id','=','users.id_profile')
         ->where('users.id',$id)->first();
 
         $this->menuAccess(\Auth::user(),'Manajemen Pengguna (Edit)');
@@ -107,8 +106,7 @@ class UserController extends Controller
         $all_data=$request->all();
 
         $validation = Validator::make($request->all(), [
-            'nama_depan'    => 'required',
-            'nama_belakang' => 'required',
+            'nama'    => 'required',
             'username'      => 'required',
             'email'         => 'required',
             'roles'         => 'required',
@@ -136,7 +134,7 @@ class UserController extends Controller
             if(!empty($all_data['password']))
             {
                 $dataUser  = array(
-                 'name'         =>ucwords(strtolower($all_data['nama_depan'])).' '.ucwords(strtolower($all_data['nama_belakang'])) ,
+                 'name'         =>ucwords(strtolower($all_data['nama'])),
                  'username'     =>$all_data['username'] ,
                  'email'        =>$all_data['email'] ,
                  'password'      =>bcrypt($all_data['password']) ,
@@ -145,7 +143,7 @@ class UserController extends Controller
             else
             {
                 $dataUser  = array(
-                 'name'         =>ucwords(strtolower($all_data['nama_depan'])).' '.ucwords(strtolower($all_data['nama_belakang'])) ,
+                 'name'         =>ucwords(strtolower($all_data['nama'])),
                  'username'     =>$all_data['username'] ,
                  'email'        =>$all_data['email'] ,
                );
@@ -199,8 +197,7 @@ class UserController extends Controller
         $all_data=$request->all();
 
         $validation = Validator::make($request->all(), [
-            'nama_depan'    => 'required',
-            'nama_belakang' => 'required',
+            'nama'    => 'required',
             'username'      => 'required',
             'email'         => 'required',
             'roles'         => 'required',
@@ -226,7 +223,7 @@ class UserController extends Controller
         try {
 
              $data  = array(
-             'name'         =>ucwords(strtolower($all_data['nama_depan'])).' '.ucwords(strtolower($all_data['nama_belakang'])) ,
+             'name'         =>ucwords(strtolower($all_data['nama'])),
              'username'     =>$all_data['username'] ,
              'email'        =>$all_data['email'] ,
              'password'     =>bcrypt($all_data['password']) ,
@@ -323,17 +320,29 @@ class UserController extends Controller
         switch($all_data['mode'])
         {
           case 'add':
-          $query="SELECT * FROM users WHERE username ILIKE '%".trim($all_data['username'])."%' LIMIT 1"; 
-          break;
-          case 'edit':
+          if (env('DB_CONNECTION') == 'pgsql') {
+              $query="SELECT * FROM users WHERE username ILIKE '%".trim($all_data['username'])."%' LIMIT 1"; 
+          }
+          else
+          {
+            $query="SELECT * FROM users WHERE username LIKE '%".trim($all_data['username'])."%' LIMIT 1"; 
+        }
+        break;
+        case 'edit':
+        if (env('DB_CONNECTION') == 'pgsql') {
           $query="SELECT * FROM users WHERE username ILIKE '%".trim($all_data['username'])."%' AND `id` <> '".$all_data['id']."' LIMIT 1"; 
-          break;
       }
-      $cek=DB::select($query);
-      if($cek==true) {
-        return Response::json(array('msg' => 'true'));
-    }
-    return Response::json(array('msg' => 'false'));  
+      else{
+       $query="SELECT * FROM users WHERE username LIKE '%".trim($all_data['username'])."%' AND `id` <> '".$all_data['id']."' LIMIT 1"; 
+   }
+
+   break;
+}
+$cek=DB::select($query);
+if($cek==true) {
+    return Response::json(array('msg' => 'true'));
+}
+return Response::json(array('msg' => 'false'));  
 }
 
 public function checkEmail(Request $request)
@@ -342,14 +351,25 @@ public function checkEmail(Request $request)
     switch($all_data['mode'])
     {
       case 'add':
-      $query="SELECT * FROM users WHERE email ILIKE '%".trim($all_data['email'])."%' LIMIT 1"; 
-      break;
-      case 'edit':
+      if (env('DB_CONNECTION') == 'pgsql') {
+          $query="SELECT * FROM users WHERE email ILIKE '%".trim($all_data['email'])."%' LIMIT 1";
+      }
+      else{
+        $query="SELECT * FROM users WHERE email LIKE '%".trim($all_data['email'])."%' LIMIT 1";
+    } 
+    break;
+    case 'edit':
+    if (env('DB_CONNECTION') == 'pgsql') {
       $query="SELECT * FROM users WHERE email ILIKE '%".trim($all_data['email'])."%' AND `id` <> '".$all_data['id']."' LIMIT 1"; 
-      break;
   }
-  $cek=DB::select($query);
-  if($cek==true) {
+  else{
+    $query="SELECT * FROM users WHERE email LIKE '%".trim($all_data['email'])."%' AND `id` <> '".$all_data['id']."' LIMIT 1"; 
+}
+
+break;
+}
+$cek=DB::select($query);
+if($cek==true) {
     return Response::json(array('msg' => 'true'));
 }
 return Response::json(array('msg' => 'false'));  
