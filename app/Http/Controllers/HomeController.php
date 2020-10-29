@@ -63,10 +63,11 @@ class HomeController extends Controller
 
         $penjualan_tahun_ini        =   $this->penjualan_setahun(date('Y'));
         $penjualan_tahun_lalu       =   $this->penjualan_setahun(date('Y')-1);
+        $penjualan_all_time         =   $this->penjualan_all_time();
 
         $bulan=$this->month_between_two_dates($date_from,$date_to);
 
-        return view('home',compact('total_transaksi','total_transaksi_bulan_ini','total_transaksi_minggu_ini','total_transaksi_hari_ini','bulan','penjualan_tahun_ini','penjualan_tahun_lalu','total_transaksi_tahun_ini','total_transaksi_tahun_lalu'));
+        return view('home',compact('total_transaksi','total_transaksi_bulan_ini','total_transaksi_minggu_ini','total_transaksi_hari_ini','bulan','penjualan_tahun_ini','penjualan_tahun_lalu','total_transaksi_tahun_ini','total_transaksi_tahun_lalu','penjualan_all_time'));
     }
 
     public static function month_between_two_dates($start_date, $end_date)
@@ -186,5 +187,37 @@ class HomeController extends Controller
         array_push($total_transaksi,$data_penjualan->Dec);
 
         return $total_transaksi;
+    }
+
+    public function penjualan_all_time()
+    {
+        $data = array();
+        $bulan_tahun = array();
+        $total = array();
+
+        if (env('DB_CONNECTION') == 'pgsql') {
+            $data_penjualan=RawDatum::select(DB::raw("to_char(tgl_transaksi, 'YYYY/MM') AS bulan_tahun, count(id) AS total"))
+            ->groupBy(\DB::raw("bulan_tahun"))
+            ->orderBy('bulan_tahun','ASC')
+            ->get();
+        }
+        else
+        {
+            $data_penjualan=RawDatum::select(DB::raw("date_format(tgl_transaksi, '%Y/%m') AS bulan_tahun, count(id) AS total"))
+            ->groupBy(\DB::raw("bulan_tahun"))
+            ->orderBy('bulan_tahun','ASC')
+            ->get();
+        }
+
+        foreach($data_penjualan as $key => $val)
+        {
+            array_push($bulan_tahun,$val->bulan_tahun);
+            array_push($total,$val->total);
+        }
+
+        $data['bulan_tahun'] = $bulan_tahun;
+        $data['total'] = $total;
+
+        return $data;
     }
 }

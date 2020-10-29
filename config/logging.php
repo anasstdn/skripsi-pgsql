@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
@@ -36,9 +37,22 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily'],
+            'channels' => ['logs','single'],
             'ignore_exceptions' => false,
         ],
+
+        /////////////////////////////////////////////////
+////// Just look at below
+// Log to MySQL
+        'logs' => [
+            'driver' => 'custom',
+            'handler' => App\Logging\MySQLLoggingHandler::class,
+            'via' => App\Logging\MySQLCustomLogger::class,
+            'level' => 'debug',
+        ],
+
+////// Just look at above
+/////////////////////////////////////////////////
 
         'single' => [
             'driver' => 'single',

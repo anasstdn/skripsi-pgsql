@@ -55,6 +55,12 @@ Route::get('/', function () {
     }
 });
 
+Route::get("/log", function(){
+    Log::channel('logs')->info("Action log debug test", ['my-string' => 'log me', "run"]);
+ 
+    return ["result" => true];
+});
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');

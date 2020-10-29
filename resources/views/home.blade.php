@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .apexcharts-xaxis-label:nth-last-child(2) {
+  transform: translateX(-20px)
+}
+</style>
 
 <div class="bg-image overflow-hidden" style="background-image: url('{{asset('oneui/')}}/src/assets/media/photos/photo3@2x.jpg');">
     <div class="bg-primary-dark-op">
@@ -103,6 +108,18 @@
     </div>
 </div>
 </div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="block block-rounded block-mode-loading-oneui">
+         <div class="block-header">
+            <h3 class="block-title">Grafik Transaksi All Time</h3>
+        </div>
+        <div class="block-content p-0 bg-body-light text-center">
+            <div id="grafik_penjualan1"></div>
+        </div>
+    </div>
+</div>
+</div>
 </div>
 <!-- END Page Content -->
 @endsection
@@ -185,6 +202,79 @@
             );
 
         chart1.render();
+
+        var options1 = {
+            chart: {
+                height: 500,
+                type: 'area',
+                stacked: false,
+                zoom: {
+                    enabled: false,
+                },
+                foreColor: '#4e4e4e',
+                toolbar: {
+                    show: false,
+                },
+                shadow: {
+                    enabled: false,
+                    color: '#000',
+                    top: 3,
+                    left: 2,
+                    blur: 3,
+                    opacity: 1,
+                },
+            },
+            stroke: {
+                width: 4,   
+                curve: 'straight',
+            },
+            series: [
+            {
+                name: 'All Time',
+                data: <?=json_encode($penjualan_all_time['total'])?>,
+            },
+            ],
+
+            tooltip: {
+                enabled: true,
+                theme: 'dark',
+            },
+            markers:{
+                size:3,
+            },
+
+            xaxis: {
+                labels: {
+                    format: 'YYYY/MM',
+                },
+                categories: <?=json_encode($penjualan_all_time['bulan_tahun'])?>,
+                tickPlacement: 'on'
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.45,
+                    opacityTo: 0.05,
+                    stops: [20, 100, 100, 100]
+                },
+            },
+            grid:{
+                show: true,
+                borderColor: 'rgba(66, 59, 116, 0.15)',
+            },
+            yaxis: {
+
+            }
+        };
+
+        var chart2 = new ApexCharts(
+            document.querySelector("#grafik_penjualan1"),
+            options1
+            );
+
+        chart2.render();
     });
 </script>
 @endpush
