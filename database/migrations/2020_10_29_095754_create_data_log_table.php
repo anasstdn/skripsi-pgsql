@@ -27,6 +27,7 @@ class CreateDataLogTable extends Migration
            $table->string('device')->nullable();
            $table->string('user_agent')->nullable();
            $table->unsignedBigInteger('user_id')->nullable();
+           $table->enum('flag_solved',['Y','N'])->default('N')->nullable();
            $table->timestamps();
            $table->softDeletes();
            $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');

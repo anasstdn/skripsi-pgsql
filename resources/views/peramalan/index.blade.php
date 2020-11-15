@@ -6,7 +6,6 @@
 		display: none;
 	}
 </style>
-
 <div class="bg-body-light">
 	<div class="content content-full">
 		<div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
@@ -25,12 +24,36 @@
 			<div class="block-content block-content-full">
 				<h4 class="font-w400">Filter Pencarian</h4>
 				<div class="form-group row">
-					<div class="col-sm-2" ><b>Tanggal</b></div>
+					<div class="col-sm-2" ><b>Minggu Start</b></div>
 					<div class="col-md-2" style="text-align:left;">
-						<input type="text" class="js-flatpickr form-control form-control-lg bg-white" id="tanggal_awal" name="tanggal_awal" placeholder="Tanggal Awal" data-date-format="d-m-Y" value="">
+						{{-- <input type="text" class="js-flatpickr form-control form-control-lg bg-white" id="tanggal_awal" name="tanggal_awal" placeholder="Tanggal Awal" data-date-format="d-m-Y" value=""> --}}
+						<select class="form-control year_week" id="year_start" name="year_start">
+							@foreach(range(2010, date('Y')) as $year){
+							<option value="{{ $year }}" {{ $year == date('Y')?'selected':'' }}>{{$year}}</option>
+							@endforeach
+						</select>
 					</div>
 					<div class="col-md-2" style="text-align:left;">
-						<input type="text" class="js-flatpickr form-control form-control-lg bg-white" id="tanggal_akhir" name="tanggal_akhir" placeholder="Tanggal Akhir" data-date-format="d-m-Y" value="">
+						<select class="form-control year_week" id="week_start" name="week_start">
+
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<div class="col-sm-2" ><b>Minggu End</b></div>
+					<div class="col-md-2" style="text-align:left;">
+						{{-- <input type="text" class="js-flatpickr form-control form-control-lg bg-white" id="tanggal_awal" name="tanggal_awal" placeholder="Tanggal Awal" data-date-format="d-m-Y" value=""> --}}
+						<select class="form-control year_week" id="year_end" name="year_end">
+							@foreach(range(2010, date('Y')) as $year){
+							<option value="{{ $year }}" {{ $year == date('Y')?'selected':'' }}>{{$year}}</option>
+							@endforeach
+						</select>
+					</div>
+					<div class="col-md-2" style="text-align:left;">
+						<select class="form-control year_week" id="week_end" name="week_end">
+
+						</select>
 					</div>
 				</div>
 
@@ -71,6 +94,10 @@
 @push('js')
 <script>
 	$(function() {
+
+		week_start();
+		week_end();
+
 		One.helpers('validation');
 		$.validator.addMethod("noSpace", function(value, element) { 
 			return value.indexOf(" ") < 0 && value != ""; 
@@ -100,20 +127,30 @@
 				jQuery(e).remove();
 			},
 			rules: {
-				'tanggal_awal': {
+				'week_start': {
 					required: true,
-					validDate:true,
 				},
-				'tanggal_akhir': {
+				'week_end': {
 					required: true,
-					validDate:true,
+				},
+				'year_start': {
+					required: true,
+				},
+				'year_end': {
+					required: true,
 				},
 			},
 			messages: {
-				'tanggal_awal': {
+				'week_start': {
 					required: 'Silahkan isi form',
 				},
-				'tanggal_akhir': {
+				'week_end': {
+					required: 'Silahkan isi form',
+				},
+				'year_start': {
+					required: 'Silahkan isi form',
+				},
+				'year_end': {
 					required: 'Silahkan isi form',
 				},
 			}
@@ -128,8 +165,8 @@
 		});
 
 		$('input').on('focus focusout keyup click change', function () {
-			var tgl_awal=$('#tanggal_awal').val();
-			var tgl_akhir=$('#tanggal_akhir').val();
+			var tgl_awal=$('#week_start').val()+'-'+$('#year_start').val();
+			var tgl_akhir=$('#week_end').val()+'-'+$('#year_end').val();
 			if(new Date(reformatDateString(tgl_awal)).getTime() > new Date(reformatDateString(tgl_akhir)).getTime())
 			{
 				bootstrap_toast('Tanggal Awal tidak boleh > Tanggal Akhir','gagal');
@@ -145,11 +182,82 @@
 			}
 		});
 
+		$('#year_start').on('change',function(){
+			week_start();
+		});
+
+		$('#year_end').on('change',function(){
+			week_end();
+		});
+
 	});
 
 	function reformatDateString(s) {
 		var b = s.split(/\D/);
 		return b.reverse().join('-');
 	}
+
+	function week_start()
+	{
+		$('.ajax-loader').fadeIn();
+		$("#status").html("Memuat...Silahkan tunggu");
+		$('#week_start').empty();
+		$.ajax({
+			url: '{{url('peramalan/get-week')}}',
+			type: 'GET',
+			data: {year:$('#year_start').val()},
+			dataType : 'html',
+			xhr: function () {
+				var xhr = new window.XMLHttpRequest();
+				xhr.upload.addEventListener("progress",
+					uploadProgressHandler,
+					false
+					);
+				xhr.addEventListener("load", loadHandler, false);
+				xhr.addEventListener("error", errorHandler, false);
+				xhr.addEventListener("abort", abortHandler, false);
+
+				return xhr;
+			},
+			success:function(data){
+				$('#week_start').html(data);
+			},
+			error:function (xhr, status, error){
+				alert(xhr.responseText);
+			},
+		});
+	}
+
+	function week_end()
+	{
+		$('.ajax-loader').fadeIn();
+		$("#status").html("Memuat...Silahkan tunggu");
+		$('#week_end').empty();
+		$.ajax({
+			url: '{{url('peramalan/get-week')}}',
+			type: 'GET',
+			data: {year:$('#year_end').val()},
+			dataType : 'html',
+			xhr: function () {
+				var xhr = new window.XMLHttpRequest();
+				xhr.upload.addEventListener("progress",
+					uploadProgressHandler,
+					false
+					);
+				xhr.addEventListener("load", loadHandler, false);
+				xhr.addEventListener("error", errorHandler, false);
+				xhr.addEventListener("abort", abortHandler, false);
+
+				return xhr;
+			},
+			success:function(data){
+				$('#week_end').html(data);
+			},
+			error:function (xhr, status, error){
+				alert(xhr.responseText);
+			},
+		});
+	}
+
 </script>
 @endpush

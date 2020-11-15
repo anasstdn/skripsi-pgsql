@@ -33,12 +33,37 @@ class PeramalanController extends Controller
 		return view('peramalan.index');
 	}
 
+	public function getWeek(Request $request)
+	{
+		$data = $request->all();
+
+		$out = '';
+
+		$date = new DateTime;
+		$date->setISODate($data['year'], 53);
+		$minggu = ($date->format("W") === "53" ? 53 : 52);
+		
+		for($i = 1; $i<= $minggu; $i++)
+		{
+			$out .= '<option value="'.$i.'">'.$i.'</option>';
+		}
+
+		echo $out;
+		exit();
+	}
+
 	public function cari(Request $request)
 	{
 		$all_data 			=	$request->all();
 
-		$tanggal_awal		=	$all_data['tanggal_awal'];
-		$tanggal_akhir		=	$all_data['tanggal_akhir'];
+		// $tanggal_awal		=	$all_data['tanggal_awal'];
+		// $tanggal_akhir		=	$all_data['tanggal_akhir'];
+
+		$tanggal_awal		=	generate_start_date($all_data['year_start'],$all_data['week_start']);
+		$tanggal_akhir		=	generate_start_date($all_data['year_end'],$all_data['week_end']);
+
+		$tanggal_akhir 		= 	date('d-m-Y',strtotime('+6 days',strtotime($tanggal_akhir)));
+
 		$produk 			=	$all_data['produk'];
 
 		return redirect(url('peramalan/search/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir));
@@ -109,21 +134,58 @@ class PeramalanController extends Controller
 		}
 		else
 		{
-			$data_penjualan 	=	RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			// $data_penjualan 	=	RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			// ->where('tgl_transaksi','>=',$date_from)
+			// ->where('tgl_transaksi','<=',$date_to)
+   //  	// ->groupby('tgl_transaksi')
+			// ->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			// ->get();
+
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
-			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+			->orderby('tgl_transaksi','ASC')
 			->get();
 		}
 
 		if(isset($data_penjualan) && !$data_penjualan->isEmpty()){
-			$minggu=$this->week_between_two_dates($date_from,$date_to);
-        // dd($minggu);
+			// $minggu=$this->week_between_two_dates($date_from,$date_to);
+			$minggu = array();
+			$total = array();
+			$subtotal = 0;
+			
+			foreach($data_penjualan as $key => $val)
+			{
+				array_push($minggu,$val->minggu);
+				switch($nama_produk)
+				{
+					case 'abu':
+					$subtotal = floatval($val->abu);
+					break;
+					case 'gendol':
+					$subtotal = floatval($val->gendol);
+					break;
+					case 'pasir':
+					$subtotal = floatval($val->pasir);
+					break;
+					case 'split2_3':
+					$subtotal = floatval($val->split2_3);
+					break;
+					case 'split1_2':
+					$subtotal = floatval($val->split1_2);
+					break;
+					case 'lpa':
+					$subtotal = floatval($val->lpa);
+					break;
+				}
+				array_push($total,$subtotal);
+			}
 
     	// $periode=$this->getPeriode($date_from,$date_to);
-			$total=$this->getTotal($minggu,$data_penjualan,$produk 	=	$nama_produk);
-        // dd($total);
+		// $total=$this->getTotal($minggu,$data_penjualan,$produk 	=	$nama_produk);
+
 			$result=$this->arrses($data_penjualan,$minggu,$total,$date_to);
 		}
 		else
@@ -142,9 +204,9 @@ class PeramalanController extends Controller
 		$E = array();
 		$AE = array();
 		$alpha = array();
-		// $beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+		$beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
 
-        $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
+        // $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
 		$PE = array();
 		$MAPE = array();
 		$MAD=array();
@@ -234,21 +296,52 @@ class PeramalanController extends Controller
 		}
 		else
 		{
-			$data_penjualan =	RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
-        // ->groupby('tgl_transaksi')
-			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+    	// ->groupby('tgl_transaksi')
+			->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+			->orderby('tgl_transaksi','ASC')
 			->get();
 		}
         // dd($data_penjualan);
 
 		if(isset($data_penjualan) && !$data_penjualan->isEmpty()){
-			$minggu=$this->week_between_two_dates($date_from,$date_to);
+			// $minggu=$this->week_between_two_dates($date_from,$date_to);
         // dd($minggu);
+			$minggu = array();
+			$total = array();
+			$subtotal = 0;
+			
+			foreach($data_penjualan as $key => $val)
+			{
+				array_push($minggu,$val->minggu);
+				switch($nama_produk)
+				{
+					case 'abu':
+					$subtotal = floatval($val->abu);
+					break;
+					case 'gendol':
+					$subtotal = floatval($val->gendol);
+					break;
+					case 'pasir':
+					$subtotal = floatval($val->pasir);
+					break;
+					case 'split2_3':
+					$subtotal = floatval($val->split2_3);
+					break;
+					case 'split1_2':
+					$subtotal = floatval($val->split1_2);
+					break;
+					case 'lpa':
+					$subtotal = floatval($val->lpa);
+					break;
+				}
+				array_push($total,$subtotal);
+			}
 
         // $periode=$this->getPeriode($date_from,$date_to);
-			$total=$this->getTotal($minggu,$data_penjualan,$produk 	=	$nama_produk);
+			// $total=$this->getTotal($minggu,$data_penjualan,$produk 	=	$nama_produk);
         // dd($total);
 			$result=$this->des1($data_penjualan,$minggu,$total,$date_to);
 		}
@@ -522,7 +615,6 @@ class PeramalanController extends Controller
 		$array = array();
 		for($i=0; $i<count($periode); $i++) {
 			for($j=0; $j<count($data); $j++) {
-            	// dd($data[$j]['minggu']+1);
 				if(explode('/',$periode[$i])[0] == ($data[$j]['minggu'])){
 					switch($produk)
 					{
@@ -592,19 +684,58 @@ class PeramalanController extends Controller
 		}
 		else
 		{
-			$data_penjualan=RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			// $data_penjualan=RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			// ->where('tgl_transaksi','>=',$date_from)
+			// ->where('tgl_transaksi','<=',$date_to)
+   //  	// ->groupby('tgl_transaksi')
+			// ->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			// ->get();
+			
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
-			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+			->orderby('tgl_transaksi','ASC')
 			->get();
 		}
 
-		$minggu=$this->week_between_two_dates($date_from,$date_to);
+		// $minggu=$this->week_between_two_dates($date_from,$date_to);
         // dd($minggu);
 
         // $periode=$this->getPeriode($date_from,$date_to);
-		$total=$this->getTotal($minggu,$data_penjualan,$produk);
+		// $total=$this->getTotal($minggu,$data_penjualan,$produk);
+		
+		$minggu = array();
+		$total = array();
+		$subtotal = 0;
+
+		foreach($data_penjualan as $key => $val)
+		{
+			array_push($minggu,$val->minggu);
+			switch($produk)
+			{
+				case 'abu':
+				$subtotal = floatval($val->abu);
+				break;
+				case 'gendol':
+				$subtotal = floatval($val->gendol);
+				break;
+				case 'pasir':
+				$subtotal = floatval($val->pasir);
+				break;
+				case 'split2_3':
+				$subtotal = floatval($val->split2_3);
+				break;
+				case 'split1_2':
+				$subtotal = floatval($val->split1_2);
+				break;
+				case 'lpa':
+				$subtotal = floatval($val->lpa);
+				break;
+			}
+			array_push($total,$subtotal);
+		}
 
 		$periode=$minggu;
 		$X=$total;
@@ -613,9 +744,9 @@ class PeramalanController extends Controller
 		$E = array();
 		$AE = array();
 		$alpha = array();
-		// $beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+		$beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
 
-        $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
+        // $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
 		$PE = array();
 		$MAPE = array();
 		$MAD=array();
@@ -763,19 +894,56 @@ class PeramalanController extends Controller
 		}
 		else
 		{
-			$data_penjualan=RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			// $data_penjualan=RawDatum::select(DB::raw('extract(week from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
+			// ->where('tgl_transaksi','>=',$date_from)
+			// ->where('tgl_transaksi','<=',$date_to)
+   //  	// ->groupby('tgl_transaksi')
+			// ->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			// ->get();
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
-			->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
+			->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+			->orderby('tgl_transaksi','ASC')
 			->get();
 		}
 
-		$minggu=$this->week_between_two_dates($date_from,$date_to);
+		// $minggu=$this->week_between_two_dates($date_from,$date_to);
         // dd($minggu);
 
         // $periode=$this->getPeriode($date_from,$date_to);
-		$total=$this->getTotal($minggu,$data_penjualan,$produk);
+		// $total=$this->getTotal($minggu,$data_penjualan,$produk);
+		$minggu = array();
+		$total = array();
+		$subtotal = 0;
+
+		foreach($data_penjualan as $key => $val)
+		{
+			array_push($minggu,$val->minggu);
+			switch($produk)
+			{
+				case 'abu':
+				$subtotal = floatval($val->abu);
+				break;
+				case 'gendol':
+				$subtotal = floatval($val->gendol);
+				break;
+				case 'pasir':
+				$subtotal = floatval($val->pasir);
+				break;
+				case 'split2_3':
+				$subtotal = floatval($val->split2_3);
+				break;
+				case 'split1_2':
+				$subtotal = floatval($val->split1_2);
+				break;
+				case 'lpa':
+				$subtotal = floatval($val->lpa);
+				break;
+			}
+			array_push($total,$subtotal);
+		}
 
 		$periode=$minggu;
 		$X=$total;

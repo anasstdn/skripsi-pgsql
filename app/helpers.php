@@ -190,5 +190,17 @@ function column_name($name)
     }
 }
 
+function generate_start_date($year,$week_number)
+{
+    $week_start = new DateTime();
+    $week_start->setISODate($year,$week_number);
+    return $week_start->format('d-m-Y');
+}
+
+function getIsoWeeksInYear($year) {
+    $date = new DateTime;
+    $date->setISODate($year, 53);
+    return ($date->format("W") === "53" ? 53 : 52);
+}
 
 ?>
