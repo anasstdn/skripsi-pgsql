@@ -277,6 +277,7 @@ class PeramalanController extends Controller
 				];
 			}
 		}
+
 		return $hasil;
 	}
 
@@ -439,6 +440,10 @@ class PeramalanController extends Controller
 				];
 			}
 		}
+		echo '<pre>';
+		print_r($hasil);
+		echo '</pre>';
+		die;
 		return $hasil;
 	}
 

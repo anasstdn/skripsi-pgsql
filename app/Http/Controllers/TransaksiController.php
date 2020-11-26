@@ -47,7 +47,13 @@ class TransaksiController extends Controller
 			}
 			if(!empty($no_nota))
 			{
-				$q->where('no_nota','ILIKE','%'.$no_nota.'%');
+				if (env('DB_CONNECTION') == 'pgsql') {
+					$q->where('no_nota','ILIKE','%'.$no_nota.'%');
+				}
+				else
+				{
+					$q->where('no_nota','LIKE','%'.$no_nota.'%');
+				}
 			}
 		})
 		->get();

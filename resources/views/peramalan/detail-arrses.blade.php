@@ -23,6 +23,8 @@
 			<div class="block-content block-content-full">
 				<!-- DataTables init on table by adding .js-dataTable-full-pagination class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _es6/pages/be_tables_datatables.js -->
 				<h4 class="font-w400">Peramalan Produk {{column_name($produk)}} dengan Metode ARRSES</h4>
+				<p>Tanggal Minggu Awal Pencarian : {{ $tanggal_awal }}</p>
+				<p>Tanggal Minggu Akhir Pencarian : {{ date('d-m-Y',strtotime('-6 days',strtotime($tanggal_akhir))) }}</p>
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="table-responsive">
@@ -43,7 +45,14 @@
 							<tbody>
 								@if(isset($aktual) && !empty($aktual))
 								@foreach($aktual as $key => $val)
-								<tr>
+								@php
+								$bgcolor = '';
+								if(($key + 1) == count($aktual))
+								{
+									$bgcolor = 'success';
+								}
+								@endphp
+								<tr bgcolor="{{ $bgcolor }}">
 									<td>{{$periode[$key]}}</td>
 									<td>{{$val}}</td>
 									<td>{{$peramalan_arrses[$key]}}</td>
