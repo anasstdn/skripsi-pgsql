@@ -248,6 +248,7 @@ Route::prefix('transaksi')->group(function() {
     Route::get('/create', 'TransaksiController@create');
     Route::match(['get', 'post'],'/get-data','TransaksiController@getData');
     Route::match(['get','post'],'/store',['as'=>'transaksi.store','uses'=>'TransaksiController@store']);
+    Route::match(['get','post'],'/import',['as'=>'transaksi.import','uses'=>'TransaksiController@import']);
     Route::match(['get', 'post'],'/{id}/edit','TransaksiController@edit');
     Route::match(['get','post'],'/update/{id}','TransaksiController@update');
     Route::get('/{id}/delete', 'TransaksiController@destroy');

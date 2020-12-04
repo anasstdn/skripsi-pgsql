@@ -130,31 +130,74 @@ class GrafikController extends Controller
             ->first();
 		}
 
-		array_push($total_transaksi,$data_penjualan->Jan);
-		array_push($total_transaksi,$data_penjualan->Feb);
-		array_push($total_transaksi,$data_penjualan->Mar);
-		array_push($total_transaksi,$data_penjualan->Apr);
-		array_push($total_transaksi,$data_penjualan->May);
-		array_push($total_transaksi,$data_penjualan->Jun);
-		array_push($total_transaksi,$data_penjualan->Jul);
-		array_push($total_transaksi,$data_penjualan->Aug);
-		array_push($total_transaksi,$data_penjualan->Sep);
-		array_push($total_transaksi,$data_penjualan->Oct);
-		array_push($total_transaksi,$data_penjualan->Nov);
-		array_push($total_transaksi,$data_penjualan->Dec);
+		// array_push($total_transaksi,$data_penjualan->Jan);
+		// array_push($total_transaksi,$data_penjualan->Feb);
+		// array_push($total_transaksi,$data_penjualan->Mar);
+		// array_push($total_transaksi,$data_penjualan->Apr);
+		// array_push($total_transaksi,$data_penjualan->May);
+		// array_push($total_transaksi,$data_penjualan->Jun);
+		// array_push($total_transaksi,$data_penjualan->Jul);
+		// array_push($total_transaksi,$data_penjualan->Aug);
+		// array_push($total_transaksi,$data_penjualan->Sep);
+		// array_push($total_transaksi,$data_penjualan->Oct);
+		// array_push($total_transaksi,$data_penjualan->Nov);
+		// array_push($total_transaksi,$data_penjualan->Dec);
+
+		$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu, COUNT(*) as total'))
+		->whereYear('tgl_transaksi','=',$all_data['tahun'])
+		->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+		->orderby('tgl_transaksi','ASC')
+		->get();
+
+		$minggu = array();
+
+		if(isset($data_penjualan) && !$data_penjualan->isEmpty())
+		{
+			foreach($data_penjualan as $key => $val)
+			{
+				array_push($minggu,$val->minggu);
+				array_push($total_transaksi,$val->total);
+			}
+		}
+
+		$penjualan_barang 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
+		->whereYear('tgl_transaksi','=',$all_data['tahun'])
+		->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+		->orderby('tgl_transaksi','ASC')
+		->get();
+
+		$total_pasir = array();
+		$total_abu = array();
+		$total_gendol = array();
+		$total_split_1 = array();
+		$total_split_2 = array();
+		$total_lpa = array();
+
+		if(isset($penjualan_barang) && !$penjualan_barang->isEmpty())
+		{
+			foreach($penjualan_barang as $key => $val)
+			{
+				array_push($total_pasir,$val->pasir);
+				array_push($total_abu,$val->abu);
+				array_push($total_gendol,$val->gendol);
+				array_push($total_split_1,$val->split1_2);
+				array_push($total_split_2,$val->split2_3);
+				array_push($total_lpa,$val->lpa);
+			}
+		}
 
 
-		$total_pasir=$this->totalPasir($all_data['tahun']);
+		// $total_pasir=$this->totalPasir($all_data['tahun']);
 
-		$total_abu=$this->totalAbu($all_data['tahun']);
+		// $total_abu=$this->totalAbu($all_data['tahun']);
 
-		$total_gendol=$this->totalGendol($all_data['tahun']);
+		// $total_gendol=$this->totalGendol($all_data['tahun']);
 
-		$total_split_1=$this->totalSplit1($all_data['tahun']);
+		// $total_split_1=$this->totalSplit1($all_data['tahun']);
 
-		$total_split_2=$this->totalSplit2($all_data['tahun']);
+		// $total_split_2=$this->totalSplit2($all_data['tahun']);
 
-		$total_lpa=$this->totalLpa($all_data['tahun']);
+		// $total_lpa=$this->totalLpa($all_data['tahun']);
 
 		$bulan=$this->month_between_two_dates($date_from,$date_to);
 
@@ -204,6 +247,7 @@ class GrafikController extends Controller
 
 		$data=array(
 			'bulan'=>$bulan,
+			'minggu' => $minggu,
 			'total_transaksi'=>$total_transaksi,
 			'total_pasir'=>$total_pasir,
 			'total_abu'=>$total_abu,

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Response;
 use DataTables;
 use Illuminate\Support\Facades\Validator;
+use App\Imports\RawDataImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransaksiController extends Controller
 {
@@ -282,5 +284,19 @@ class TransaksiController extends Controller
     		$act=$user->delete();
     		message($act,'Data berhasil dihapus!','Data gagal dihapus!');
     	}
+    }
+
+    public function import(Request $request)
+    {
+
+    	DB::table('raw_data')->delete();
+    	DB::statement("ALTER TABLE raw_data AUTO_INCREMENT = 1");
+
+    	$import = new RawDataImport;
+        Excel::import($import,request()->file('file'));
+
+        message(true,'Data berhasil di import!','Data gagal diimport!');
+        
+        return back();
     }
 }

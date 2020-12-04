@@ -50,10 +50,19 @@
 			</div>
 
 			<div class="form-group row">
-				<div class="col-md-1">
-					<a class="btn btn-primary btn-sm" id="tambah" href="#" onclick="show_modal('{{url('transaksi/create')}}')" >Tambah</a>
+				<div class="col-md-4">
+					<a class="btn btn-primary btn-sm" id="tambah" href="#" onclick="show_modal('{{url('transaksi/create')}}')" >Tambah</a>&nbsp&nbsp
+                    <a class="btn btn-success btn-sm" id="btn_import" href="#">Import Data</a>
+                    <form action="{{ route('transaksi.import') }}" id="import" method="POST" enctype="multipart/form-data" style="display: none">
+                        @csrf
+                        <input type="file" name="file" class="form-control">
+                        <br>
+                        <button type="submit" id="submit" class="btn btn-success btn-sm">Import</button>
+                        &nbsp
+                        <a class="btn btn-warning btn-sm" id="kembali" href="#">Kembali</a>
+                    </form>
 				</div>
-			</div>
+            </div>
 			<!-- DataTables init on table by adding .js-dataTable-full-pagination class, functionality is initialized in js/pages/be_tables_datatables.min.js which was auto compiled from _es6/pages/be_tables_datatables.js -->
 			<div class="row">
 				<div class="col-lg-12" id="table_width">
@@ -92,6 +101,24 @@
 <script type="text/javascript">
 	var table;
 	$(function() {
+
+        $('#btn_import').on('click',function(){
+          $('#btn_import').fadeOut({queue: false, duration: 'slow'});
+          $('#btn_import').animate({ top: "-10px" }, 'slow');
+          $('#tambah').fadeOut({queue: false, duration: 'slow'});
+          $('#tambah').animate({ top: "-10px" }, 'slow');
+          $('#import').fadeIn({queue: false, duration: 'slow'});
+          $('#import').animate({ top: "-10px" }, 'slow');
+      });
+
+        $('#kembali').on('click',function(){
+          $('#btn_import').fadeIn({queue: false, duration: 'slow'});
+          $('#btn_import').animate({ top: "-10px" }, 'slow');
+          $('#tambah').fadeIn({queue: false, duration: 'slow'});
+          $('#tambah').animate({ top: "-10px" }, 'slow');
+          $('#import').fadeOut({queue: false, duration: 'slow'});
+          $('#import').animate({ top: "-10px" }, 'slow');
+      });
 
 		 $('.js-select2:not(.js-select2-enabled)').each((index, element) => {
             let el = jQuery(element);

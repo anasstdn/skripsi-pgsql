@@ -286,6 +286,8 @@
 
         <script src="{{asset('oneui/')}}/src/assets/js/plugins/moment/moment.min.js"></script>
 
+        <script src="{{asset('oneui/')}}/src/assets/js/plugins/chart.js/Chart.bundle.min.js"></script>
+
         <script>jQuery(function(){ One.helpers(['flatpickr']); });</script>
 
         <script type="text/javascript">

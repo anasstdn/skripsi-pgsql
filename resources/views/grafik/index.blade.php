@@ -45,7 +45,8 @@
 						<div class="card">
 							<div class="card-header text-uppercase">GRAFIK TRANSAKSI PRODUK TAHUNAN</div>
 							<div class="card-body">
-								<div id="grafik"></div>
+								<canvas class="js-chartjs-lines"></canvas>
+								{{-- <div id="grafik"></div> --}}
 							</div>
 						</div>
 					</div>
@@ -67,7 +68,8 @@
 						<div class="card">
 							<div class="card-header text-uppercase">GRAFIK TOTAL PENJUALAN PRODUK TAHUNAN (SATUAN METER KUBIK)</div>
 							<div class="card-body">
-								<div id="grafik_penjualan"></div>
+								{{-- <div id="grafik_penjualan"></div> --}}
+								<canvas class="js-chartjs-lines1"></canvas>
 							</div>
 						</div>
 					</div>
@@ -79,6 +81,29 @@
 
 	@push('js')
 	<script type="text/javascript">
+
+		Chart.defaults.global.defaultFontColor              = '#999';
+        Chart.defaults.global.defaultFontStyle              = '600';
+        Chart.defaults.scale.gridLines.color                = "rgba(0,0,0,.05)";
+        Chart.defaults.scale.gridLines.zeroLineColor        = "rgba(0,0,0,.1)";
+        Chart.defaults.scale.ticks.beginAtZero              = true;
+        Chart.defaults.global.elements.line.borderWidth     = 2;
+        Chart.defaults.global.elements.point.radius         = 4;
+        Chart.defaults.global.elements.point.hoverRadius    = 6;
+        Chart.defaults.global.tooltips.cornerRadius         = 3;
+        Chart.defaults.global.legend.labels.boxWidth        = 15;
+
+        let chartLinesCon  = $('.js-chartjs-lines');
+        let chartLinesCon1  = $('.js-chartjs-lines1');
+
+        let chartLines;
+
+        let chartLines1;
+
+        let chartTransaksi;
+
+        let chartTotal;
+
 		$(document).ready(function(){
 			reload();
 			$('#tahun').on('change',function(){
@@ -98,8 +123,8 @@
 				type: 'GET',
 				data: {tahun:$('#tahun').val()},
 				success:function(data){      
-					chart_penjualan(data.bulan,data.total_transaksi);
-					chart_total(data.bulan,data.total_pasir,data.total_abu,data.total_gendol,data.total_split_1,data.total_split_2,data.total_lpa);
+					chart_penjualan(data.minggu,data.total_transaksi);
+					chart_total(data.minggu,data.total_pasir,data.total_abu,data.total_gendol,data.total_split_1,data.total_split_2,data.total_lpa);
 					chart_pie(data.label_pie,data.graph_pie);
 					$('.ajax-loader').fadeOut();
 				},
@@ -111,171 +136,163 @@
 
 		function chart_penjualan(label,total)
 		{
-			var options = {
-				chart: {
-					height: 350,
-					type: 'area',
-					stacked: false,
-					zoom: {
-						enabled: false,
-					},
-					foreColor: '#4e4e4e',
-					toolbar: {
-						show: false,
-					},
-					shadow: {
-						enabled: false,
-						color: '#000',
-						top: 3,
-						left: 2,
-						blur: 3,
-						opacity: 1
-					},
-				},
-				stroke: {
-					width: 4,   
-					curve: 'straight',
-				},
-				series: [
+			chartTransaksi = {
+				labels: label,
+				datasets: [
 				{
-					name: 'Total Transaksi',
-					data: total,
+					label: 'Total Transaksi Tahun '+$('#tahun').val(),
+					fill: true,
+					backgroundColor: 'rgba(171, 227, 125, .3)',
+                    borderColor: 'rgba(171, 227, 125, 1)',
+                    pointBackgroundColor: 'rgba(171, 227, 125, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(171, 227, 125, 1)',
+					data: total
 				},
-				],
-
-				tooltip: {
-					enabled: true,
-					theme: 'dark',
-				},
-				markers:{
-					size:3
-				},
-
-				xaxis: {
-					labels: {
-						format: 'dd/MM',
-					},
-					categories: label,
-				},
-				fill: {
-					type: 'gradient',
-					gradient: {
-						shadeIntensity: 1,
-						inverseColors: false,
-						opacityFrom: 0.45,
-						opacityTo: 0.05,
-						stops: [20, 100, 100, 100]
-					},
-				},
-				colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800'],
-				grid:{
-					show: true,
-					borderColor: 'rgba(66, 59, 116, 0.15)',
-				},
+				]
 			};
 
-			var chart = new ApexCharts(
-				document.querySelector("#grafik"),
-				options
-				);
-
-			chart.render();
+			if (chartLinesCon.length) 
+			{
+				chartLines = new Chart(chartLinesCon, { type: 'line', 
+					data: chartTransaksi,
+					options: {
+						scales: {
+							xAxes: [{
+								display: true,
+								scaleLabel: {
+									display: true,
+									labelString: 'Minggu / Tahun',
+									fontStyle: 'bold'
+								},
+								ticks: {
+									autoSkip: true,
+									maxTicksLimit: 10,
+									stepSize: 3
+								},
+								gridLines: {
+									display: false
+								}
+							}],
+							yAxes: [{
+								gridLines: {
+									display: true
+								}
+							}]
+						}
+					}
+				});
+			}
 		}
 
 		function chart_total(label,pasir,abu,gendol,split1,split2,lpa)
 		{
-			var options = {
-				chart: {
-					height: 500,
-					type: 'area',
-					stacked: false,
-					zoom: {
-						enabled: false,
-					},
-					foreColor: '#4e4e4e',
-					toolbar: {
-						show: false,
-					},
-					shadow: {
-						enabled: false,
-						color: '#000',
-						top: 3,
-						left: 2,
-						blur: 3,
-						opacity: 1,
-					},
-				},
-				stroke: {
-					width: 4,   
-					curve: 'smooth',
-				},
-				series: [
-				{
-					name: 'Pasir',
-					data: pasir,
-				},
-				{
-					name: 'Abu',
-					data: abu,
-				},
-				{
-					name: 'Gendol',
-					data: gendol,
-				},
-				{
-					name: 'Split 1/2',
-					data: split1,
-				},
-				{
-					name: 'Split 2/3',
-					data: split2,
-				},
-				{
-					name: 'LPA',
-					data: lpa,
-				},
-				],
 
-				tooltip: {
-					enabled: true,
-					theme: 'dark',
+			chartTotal = {
+				labels: label,
+				datasets: [
+				{
+					label: 'Pasir',
+					fill: false,
+					backgroundColor: 'rgba(171, 227, 125, .3)',
+                    borderColor: 'rgba(171, 227, 125, 1)',
+                    pointBackgroundColor: 'rgba(171, 227, 125, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(171, 227, 125, 1)',
+					data: pasir
 				},
-				markers:{
-					size:3,
+				{
+					label: 'Abu',
+					fill: false,
+					backgroundColor: 'rgba(220,220,220,.3)',
+                    borderColor: 'rgba(220,220,220,1)',
+                    pointBackgroundColor: 'rgba(220,220,220,1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(220,220,220,1)',
+					data: abu
 				},
-
-				xaxis: {
-					labels: {
-						format: 'dd/MM',
-					},
-					categories: label,
+				{
+					label: 'Gendol',
+					fill: false,
+					backgroundColor: 'rgba(0,128,128,.3)',
+                    borderColor: 'rgba(0,128,128,1)',
+                    pointBackgroundColor: 'rgba(0,128,128,1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(0,128,128,1)',
+					data: gendol
 				},
-				fill: {
-					type: 'gradient',
-					gradient: {
-						shadeIntensity: 1,
-						inverseColors: false,
-						opacityFrom: 0.45,
-						opacityTo: 0.05,
-						stops: [20, 100, 100, 100]
-					},
+				{
+					label: 'Split 1/2',
+					fill: false,
+					backgroundColor: 'rgba(32,178,170,.3)',
+                    borderColor: 'rgba(32,178,170,1)',
+                    pointBackgroundColor: 'rgba(32,178,170,1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(32,178,170,1)',
+					data: split1
 				},
-				colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800'],
-				grid:{
-					show: true,
-					borderColor: 'rgba(66, 59, 116, 0.15)',
+				{
+					label: 'Split 2/3',
+					fill: false,
+					backgroundColor: 'rgba(139,69,19,.3)',
+                    borderColor: 'rgba(139,69,19,1)',
+                    pointBackgroundColor: 'rgba(139,69,19,1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(139,69,19,1)',
+					data: split2
 				},
-				yaxis: {
-					max: 3000,                
-				}
+				{
+					label: 'LPA',
+					fill: false,
+					backgroundColor: 'rgba(176,196,222,.3)',
+                    borderColor: 'rgba(176,196,222,1)',
+                    pointBackgroundColor: 'rgba(176,196,222,1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(176,196,222,1)',
+					data: lpa
+				},
+				]
 			};
 
-			var chart1 = new ApexCharts(
-				document.querySelector("#grafik_penjualan"),
-				options
-				);
+			if (chartLinesCon1.length) 
+			{
+				chartLines1 = new Chart(chartLinesCon1, { type: 'line', 
+					data: chartTotal,
+					options: {
+						scales: {
+							xAxes: [{
+								display: true,
+								scaleLabel: {
+									display: true,
+									labelString: 'Minggu / Tahun',
+									fontStyle: 'bold'
+								},
+								ticks: {
+									autoSkip: true,
+									maxTicksLimit: 10,
+									stepSize: 3
+								},
+								gridLines: {
+									display: false
+								}
+							}],
+							yAxes: [{
+								gridLines: {
+									display: true
+								}
+							}]
+						}
+					}
+				});
+			}
 
-			chart1.render();
 		}
 
 		function chart_pie(label,data)

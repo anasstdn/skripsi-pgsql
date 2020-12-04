@@ -440,10 +440,10 @@ class PeramalanController extends Controller
 				];
 			}
 		}
-		echo '<pre>';
-		print_r($hasil);
-		echo '</pre>';
-		die;
+		// echo '<pre>';
+		// print_r($hasil);
+		// echo '</pre>';
+		// die;
 		return $hasil;
 	}
 

@@ -94,7 +94,7 @@
                 else
                 {
                     $arrow      =   'up';
-                    $percentage =   ($total / $tahun_lalu) * 100;
+                    $percentage =   $tahun_lalu > 0?($total / $tahun_lalu) * 100:0;
                     $sign       =   '+';
                 }
 

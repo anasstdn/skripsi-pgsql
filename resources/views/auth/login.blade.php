@@ -84,7 +84,12 @@
             'main-content-narrow'                       Full width Main Content with a percentage width (screen width > 1200px)
         -->
         <div id="page-container">
-
+            {{-- @php
+            $data = test_api();
+            Session::put('api_token', $data->token->token);
+            $api = Session::get('api_token');
+            api_get('localhost:8000/api/details',$api);
+            @endphp --}}
             <!-- Main Container -->
             <main id="main-container">
 

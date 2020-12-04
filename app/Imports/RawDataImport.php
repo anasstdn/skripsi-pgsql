@@ -1,7 +1,9 @@
 <?php
   
 namespace App\Imports;
-  
+
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;    
 use App\Models\RawDatum;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Carbon\Carbon;
@@ -16,6 +18,7 @@ class RawDataImport implements ToModel
     */
     public function model(array $row)
     {
+        if($row[0] !==null){
         return new RawDatum([
             'tgl_transaksi' => Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row[0]))->format('Y-m-d'),
             'no_nota' => isset($row[1])?$row[1]:null,
@@ -27,5 +30,6 @@ class RawDataImport implements ToModel
             'lpa'=>isset($row[7])?$row[7]:null,
             'campur'=>isset($row[8])?$row[8]:null,
         ]);
+        }
     }
 }
