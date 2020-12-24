@@ -32,6 +32,30 @@ class GrafikController extends Controller
 		return view('grafik.index');
 	}
 
+	public function getChart1(Request $request)
+	{
+		$all_data=$request->all();
+		$data['tahun'] = $all_data['tahun'];
+        $token = \Auth::user()->api_token;
+        $url = "localhost:8000/api/v1/transaksi";
+        $get_data = get_data_with_param($data, $token, $url);
+
+        $data=array(
+			'minggu' => $get_data->minggu,
+			'total_transaksi'=>$get_data->total_transaksi,
+			'total_pasir'=>$get_data->total_pasir,
+			'total_abu'=>$get_data->total_abu,
+			'total_gendol'=>$get_data->total_gendol,
+			'total_split_1'=>$get_data->total_split_1,
+			'total_split_2'=>$get_data->total_split_2,
+			'total_lpa'=>$get_data->total_lpa,
+			'graph_pie'=>$get_data->graph_pie,
+			'label_pie'=>$get_data->label_pie,
+		);
+
+		return \Response::json($data);  
+	}
+
 	public function getChart(Request $request)
 	{
 		  // dd('aaaaa');

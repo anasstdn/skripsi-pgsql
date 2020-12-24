@@ -71,6 +71,26 @@
 					</div>
 				</div>
 
+				<div class="form-group row">
+					<div class="col-sm-2" ><b>Koefisien Alpha Beta</b></div>
+					<div class="col-md-4" style="text-align:left;">
+						<select class="form-control" name="koefisien_alpha_beta" id="koefisien_alpha_beta">
+							<option value="random">Random (0,01 sd 0,99)</option>
+							<option value="rumus">Periode Uji (2 / (n+1))</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<div class="col-sm-2 hide_form" style="display: none"><b>Ketetapan Nilai Peramalan</b></div>
+					<div class="col-md-4 hide_form" style="text-align:left;display: none">
+						<select class="form-control" name="ketetapan_nilai_peramalan" id="ketetapan_nilai_peramalan">
+							<option value="mape">MAPE</option>
+							<option value="mad">MAD</option>
+						</select>
+					</div>
+				</div>
+
 				<div class="row" style="margin-bottom: 0.2em">
 					<div class="col-md-6 text-right">
 						<button type="submit" id="simpan" class="btn btn-primary">Cari</button>
@@ -97,6 +117,12 @@
 
 		week_start();
 		week_end();
+
+		ketetapan();
+		
+		$('#koefisien_alpha_beta').on('change',function(){
+			ketetapan();
+		});
 
 		One.helpers('validation');
 		$.validator.addMethod("noSpace", function(value, element) { 
@@ -191,6 +217,18 @@
 		});
 
 	});
+
+	function ketetapan()
+	{
+		if($('#koefisien_alpha_beta').val() == 'random')
+		{
+			$('.hide_form').fadeIn();
+		}
+		else
+		{
+			$('.hide_form').fadeOut();
+		}
+	}
 
 	function reformatDateString(s) {
 		var b = s.split(/\D/);

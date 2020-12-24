@@ -66,7 +66,63 @@ class PeramalanController extends Controller
 
 		$produk 			=	$all_data['produk'];
 
-		return redirect(url('peramalan/search/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir));
+		$data['produk'] = $produk;
+		$data['tanggal_awal'] = $tanggal_awal;
+		$data['tanggal_akhir'] = $tanggal_akhir;
+		$data['koefisien_alpha_beta'] = $all_data['koefisien_alpha_beta'];
+		if($all_data['koefisien_alpha_beta'] !== 'rumus')
+		{
+			$data['ketetapan_nilai_peramalan'] = $all_data['ketetapan_nilai_peramalan'];
+		} 
+
+		return redirect(url('peramalan/search/'.serialize($data)));
+	}
+
+	public function search1($array)
+	{
+		$array = unserialize($array);
+		
+		$token = \Auth::user()->api_token;
+        $url = "localhost:8000/api/v1/peramalan";
+        $get_data = get_data_with_param($array, $token, $url);
+
+        if($get_data == null)
+        {
+        	message(false,'','Tidak terhubung pada API');
+
+			return redirect('/peramalan');
+        }
+
+        if($get_data->status == true)
+        {
+        	$arrses = $get_data->arrses;
+        	$des = $get_data->des;
+        	$periode = $get_data->periode;
+        	$aktual = $get_data->aktual;
+        	$peramalan_arrses = $get_data->peramalan_arrses;
+        	$peramalan_des = $get_data->peramalan_des;
+        	$length_arrses = $get_data->length_arrses;
+        	$mad_arrses = $get_data->mad_arrses;
+        	$pe_arrses = $get_data->pe_arrses;
+        	$mad_des = $get_data->mad_des;
+        	$pe_des = $get_data->pe_des;
+        	$length_des = $get_data->length_des;
+        	$tanggal_awal = $array['tanggal_awal'];
+        	$tanggal_akhir = $array['tanggal_akhir'];
+        	$produk = $array['produk'];
+        	$koefisien_alpha_beta = $array['koefisien_alpha_beta'];
+        	$ketetapan_nilai_peramalan = isset($array['ketetapan_nilai_peramalan'])?$array['ketetapan_nilai_peramalan']:null;
+        	$beta_arrses = $get_data->beta_arrses;
+        	$alpha_des = $get_data->alpha_des;
+
+        	return view('peramalan.hasil',compact('arrses','des','periode','aktual','peramalan_arrses','peramalan_des','length_arrses','length_des','mad_arrses','pe_arrses','mad_des','pe_des','tanggal_awal','tanggal_akhir','produk','koefisien_alpha_beta','ketetapan_nilai_peramalan','beta_arrses','alpha_des'));
+        }
+        else
+        {
+        	message(false,'',$get_data->msg);
+
+			return redirect('/peramalan');
+        }
 	}
 
 	public function search($produk,$tanggal_awal,$tanggal_akhir)
@@ -118,11 +174,11 @@ class PeramalanController extends Controller
 		}
 	}
 
-	public function forecastingArrses($tanggal_awal,$tanggal_akhir,$nama_produk)
+	// public function forecastingArrses($tanggal_awal,$tanggal_akhir,$nama_produk)
+	public function forecastingArrses($input)
 	{
-        // dd($request->all());
-		$date_from 	=	date('Y-m-d',strtotime($tanggal_awal));
-		$date_to 	=	date('Y-m-d',strtotime($tanggal_akhir));  
+		$date_from 	=	date('Y-m-d',strtotime($input['tanggal_awal']));
+		$date_to 	=	date('Y-m-d',strtotime($input['tanggal_akhir']));  
 
 		if (env('DB_CONNECTION') == 'pgsql') {
 			$data_penjualan 	=	RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
@@ -141,7 +197,7 @@ class PeramalanController extends Controller
 			// ->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
 			// ->get();
 
-			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split1_2)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
@@ -159,7 +215,7 @@ class PeramalanController extends Controller
 			foreach($data_penjualan as $key => $val)
 			{
 				array_push($minggu,$val->minggu);
-				switch($nama_produk)
+				switch($input['produk'])
 				{
 					case 'abu':
 					$subtotal = floatval($val->abu);
@@ -182,11 +238,17 @@ class PeramalanController extends Controller
 				}
 				array_push($total,$subtotal);
 			}
-
     	// $periode=$this->getPeriode($date_from,$date_to);
 		// $total=$this->getTotal($minggu,$data_penjualan,$produk 	=	$nama_produk);
+		
+			$arr = array(
+				'data_penjualan' => $data_penjualan,
+				'minggu' => $minggu,
+				'total' => $total,
+				'date_to' => $date_to,
+			);
 
-			$result=$this->arrses($data_penjualan,$minggu,$total,$date_to);
+			$result=$this->arrses(array_merge($arr,$input));
 		}
 		else
 		{
@@ -195,16 +257,28 @@ class PeramalanController extends Controller
 		return $result;
 	}
 
-	private function arrses($data_penjualan,$periode,$total,$date_to)
+	// private function arrses($data_penjualan,$periode,$total,$date_to)
+	private function arrses($array)
 	{
-		$periode=$periode;
-		$X=$total;
+		$periode=$array['minggu'];
+        $X=$array['total'];
 		$F = array();
 		$e = array();
 		$E = array();
 		$AE = array();
 		$alpha = array();
-		$beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+
+		if($array['koefisien_alpha_beta'] == 'random')
+        {
+            $beta = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+
+            $count = count($beta);
+        }
+        else
+        {
+            $beta[0] = 2 / (count($periode) + 1);
+            $count = 1;
+        }
 
         // $beta=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9];
 		$PE = array();
@@ -242,9 +316,24 @@ class PeramalanController extends Controller
             // menghitung rata-rata kesalahan peramalan
             // $MAPE[$i] = array_sum($PE[$i])/(count($periode) - 1);
 			$MAPE[$i] = array_sum($PE[$i])/(count($periode));
+			$SUMMAD[$i] = array_sum($MAD[$i])/(count($periode));
 		}
         // dd($MAD);
-		$bestBetaIndex = array_search(min($MAPE), $MAPE);
+		if($array['koefisien_alpha_beta'] == 'random')
+        {
+            if($array['ketetapan_nilai_peramalan'] == 'mape')
+            {
+                $bestBetaIndex = array_search(min($MAPE), $MAPE); 
+            }
+            else
+            {
+                $bestBetaIndex = array_search(min($SUMMAD), $SUMMAD); 
+            }
+        }
+        else
+        {
+           $bestBetaIndex = array_search(min($MAPE), $MAPE); 
+        }
 
 		$hasil = array();
 		for ($i = 0; $i <= count($periode); $i++) {
@@ -259,11 +348,12 @@ class PeramalanController extends Controller
 					'alpha'                     => $alpha[$bestBetaIndex][$i],
 					'percentage_error'          => $PE[$bestBetaIndex][$i],
 					'MAD'                       => $MAD[$bestBetaIndex][$i],
+					'beta'                      => $beta[$bestBetaIndex],
 
 				];
 			} else {
         		// $nextPeriode = date('W', strtotime(date($date_to)));
-				$nextPeriode = Carbon::parse($date_to)->addWeeks(1)->format('W/Y');
+				$nextPeriode = Carbon::parse($array['date_to'])->addWeeks(1)->format('W/Y');
 				$hasil[$i] = [
 					'periode'                   => $nextPeriode,
 					'aktual'                    => 0,
@@ -274,6 +364,7 @@ class PeramalanController extends Controller
 					'alpha'                     => $alpha[$bestBetaIndex][$i],
 					'percentage_error'          => 0,
 					'MAD'                       => 0,
+					'beta'                      => $beta[$bestBetaIndex],
 				];
 			}
 		}
@@ -281,11 +372,10 @@ class PeramalanController extends Controller
 		return $hasil;
 	}
 
-	public function forecastingDes($tanggal_awal,$tanggal_akhir,$nama_produk)
+	public function forecastingDes($input)
 	{
-
-		$date_from 		=	date('Y-m-d',strtotime($tanggal_awal));
-		$date_to 		=	date('Y-m-d',strtotime($tanggal_akhir));  
+		$date_from 		=	date('Y-m-d',strtotime($input['tanggal_awal']));
+		$date_to 		=	date('Y-m-d',strtotime($input['tanggal_akhir']));  
 		
 		if (env('DB_CONNECTION') == 'pgsql') {
 			$data_penjualan =	RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
@@ -297,7 +387,7 @@ class PeramalanController extends Controller
 		}
 		else
 		{
-			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split1_2)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
@@ -317,7 +407,7 @@ class PeramalanController extends Controller
 			foreach($data_penjualan as $key => $val)
 			{
 				array_push($minggu,$val->minggu);
-				switch($nama_produk)
+				switch($input['produk'])
 				{
 					case 'abu':
 					$subtotal = floatval($val->abu);
@@ -344,7 +434,14 @@ class PeramalanController extends Controller
         // $periode=$this->getPeriode($date_from,$date_to);
 			// $total=$this->getTotal($minggu,$data_penjualan,$produk 	=	$nama_produk);
         // dd($total);
-			$result=$this->des1($data_penjualan,$minggu,$total,$date_to);
+        	$arr = array(
+                'data_penjualan' => $data_penjualan,
+                'minggu' => $minggu,
+                'total' => $total,
+                'date_to' => $date_to,
+            );
+
+			$result=$this->des1(array_merge($arr,$input));
 		}
 		else
 		{
@@ -354,16 +451,28 @@ class PeramalanController extends Controller
 		return $result;
 	}
 
-	private function des1($data_penjualan,$periode,$total,$date_to)
+	private function des1($array)
 	{
-		$periode=$periode;
-		$X=$total;
+		$periode=$array['minggu'];
+        $X=$array['total'];
 		$F = array();
 		$s1 = array();
 		$s2 = array();
 		$at = array();
 		$bt = array();
-		$alpha=[0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+
+		if($array['koefisien_alpha_beta'] == 'random')
+        {
+            $alpha=[0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20, 0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.56,0.57,0.58,0.59,0.60,0.61,0.62,0.63,0.64,0.65,0.66,0.67,0.68,0.69,0.70,0.71,0.72,0.73,0.74,0.75,0.76,0.77,0.78,0.79,0.80,0.81,0.82,0.83,0.84,0.85,0.86,0.87,0.88,0.89,0.90,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99];
+
+            $count = count($alpha);
+        }
+        else
+        {
+            $alpha[0] = 2 / (count($periode) + 1);
+            $count = 1;
+        }
+
         // $alpha=[0.01];
 		$PE = array();
 		$MAPE = array();
@@ -385,7 +494,7 @@ class PeramalanController extends Controller
 
 					$at[$i][$j+1]=(2*$s1[$i][$j+1])-$s2[$i][$j+1];
 					$bt[$i][$j+1]=($alpha[$i]/(1-$alpha[$i]))*($s1[$i][$j+1]-$s2[$i][$j+1]);
-					$F[$i][$j+1]=$at[$i][$j+1]+$bt[$i][$j+1];
+					$F[$i][$j+1]=$at[$i][$j]+$bt[$i][$j];
 
 					$MAD[$i][$j+1]=$X[$j+1]==0?0:abs($X[$j+1]-$F[$i][$j+1]);
 					$PE[$i][$j+1]=$X[$j+1] == 0 ? 0 : abs((($X[$j+1] - $F[$i][$j+1]) / $X[$j+1]) * 100);
@@ -402,9 +511,24 @@ class PeramalanController extends Controller
 				}
 			}
 			$MAPE[$i] = array_sum($PE[$i])/(count($periode)+1);
+			$SUMMAD[$i] = array_sum($MAD[$i])/(count($periode));
 		}
 
-		$bestAlphaIndex = array_search(min($MAPE), $MAPE);
+		if($array['koefisien_alpha_beta'] == 'random')
+        {
+            if($array['ketetapan_nilai_peramalan'] == 'mape')
+            {
+                $bestAlphaIndex = array_search(min($MAPE), $MAPE); 
+            }
+            else
+            {
+                $bestAlphaIndex = array_search(min($SUMMAD), $SUMMAD); 
+            }
+        }
+        else
+        {
+           $bestAlphaIndex = array_search(min($MAPE), $MAPE); 
+        }
 
 		$hasil = array();
 		for ($i = 0; $i <= count($periode); $i++) {
@@ -425,7 +549,7 @@ class PeramalanController extends Controller
 			}
 			else
 			{
-				$nextPeriode = Carbon::parse($date_to)->addWeeks(1)->format('W/Y');
+				$nextPeriode = Carbon::parse($array['date_to'])->addWeeks(1)->format('W/Y');
 				$hasil[$i] = [
 					'periode'                   => $nextPeriode,
 					'aktual'                    => 0,
@@ -674,10 +798,15 @@ class PeramalanController extends Controller
 		return $array;
 	}
 
-	public function detailArrses(Request $request,$produk,$date_from,$date_to)
+	// public function detailArrses(Request $request,$produk,$date_from,$date_to)
+	public function detailArrses(Request $request,$array)
 	{
-		$date_from=date('Y-m-d',strtotime($date_from));
-		$date_to=date('Y-m-d',strtotime($date_to));
+		$input = unserialize($array);
+		$date_from=date('Y-m-d',strtotime($input['tanggal_awal']));
+		$date_to=date('Y-m-d',strtotime($input['tanggal_akhir']));
+		$produk = $input['produk'];
+		$koefisien_alpha_beta = $input['koefisien_alpha_beta'];
+		$ketetapan_nilai_peramalan = $input['ketetapan_nilai_peramalan'];
 
 		if (env('DB_CONNECTION') == 'pgsql') {
 			$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
@@ -696,7 +825,7 @@ class PeramalanController extends Controller
 			// ->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
 			// ->get();
 			
-			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split1_2)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
@@ -718,7 +847,7 @@ class PeramalanController extends Controller
 		foreach($data_penjualan as $key => $val)
 		{
 			array_push($minggu,$val->minggu);
-			switch($produk)
+			switch($input['produk'])
 			{
 				case 'abu':
 				$subtotal = floatval($val->abu);
@@ -744,6 +873,7 @@ class PeramalanController extends Controller
 
 		$periode=$minggu;
 		$X=$total;
+
 		$F = array();
 		$e = array();
 		$E = array();
@@ -790,17 +920,28 @@ class PeramalanController extends Controller
 			$MADTotal[$i]=array_sum($MAD[$i])/(count($periode));
 
 		}
-		$bestBetaIndex = array_search(min($MAPE), $MAPE);
+		if($input['ketetapan_nilai_peramalan'] == 'mape')
+		{
+			$bestBetaIndex = array_search(min($MAPE), $MAPE); 
+		}
+		else
+		{
+			$bestBetaIndex = array_search(min($MADTotal), $MADTotal); 
+		}
         // dd($bestBetaIndex);
 
-		return view('peramalan.mape-arrses',compact('MAPE','bestBetaIndex','beta','MADTotal','produk','date_from','date_to'));
+		return view('peramalan.mape-arrses',compact('MAPE','bestBetaIndex','beta','MADTotal','produk','date_from','date_to','koefisien_alpha_beta','ketetapan_nilai_peramalan'));
 	}
 
-	public function detailArrses1(Request $request, $produk, $date_from, $date_to)
+	public function detailArrses1(Request $request, $array)
 	{
-		$tanggal_awal		=	$date_from;
-		$tanggal_akhir		=	$date_to;
-		$produk 			=	$produk;
+		$input = unserialize($array);
+		
+		$tanggal_awal		=	$input['tanggal_awal'];
+		$tanggal_akhir		=	$input['tanggal_akhir'];
+		$produk 			=	$input['produk'];
+		$koefisien_alpha_beta = $input['koefisien_alpha_beta'];
+        $ketetapan_nilai_peramalan = isset($input['ketetapan_nilai_peramalan'])?$input['ketetapan_nilai_peramalan']:null;
 
 		$periode 			=	array();
 		$aktual		 		=	array();
@@ -814,7 +955,7 @@ class PeramalanController extends Controller
 		$pe_des 			=	0;
 
 
-		$arrses 			=	$this->forecastingArrses($tanggal_awal,$tanggal_akhir,$produk);
+		$arrses 			=	$this->forecastingArrses($input);
 
 		if(isset($arrses))
 		{
@@ -830,7 +971,9 @@ class PeramalanController extends Controller
 				$pe_arrses 	+=	$val['percentage_error'];
 			}
 
-			return view('peramalan.detail-arrses',compact('arrses','periode','aktual','peramalan_arrses','length_arrses','mad_arrses','pe_arrses','tanggal_awal','tanggal_akhir','produk'));
+			$beta_arrses = $arrses[0]['beta'];
+
+			return view('peramalan.detail-arrses',compact('arrses','periode','aktual','peramalan_arrses','length_arrses','mad_arrses','pe_arrses','tanggal_awal','tanggal_akhir','produk','beta_arrses','koefisien_alpha_beta','ketetapan_nilai_peramalan'));
 		}
 		else
 		{
@@ -840,11 +983,20 @@ class PeramalanController extends Controller
 		}
 	}
 
-	public function detailDes1(Request $request, $produk, $date_from, $date_to)
+	public function detailArrses2(Request $request, $produk, $date_from, $date_to)
 	{
-		$tanggal_awal		=	$date_from;
-		$tanggal_akhir		=	$date_to;
-		$produk 			=	$produk;
+
+	}
+
+	public function detailDes1(Request $request, $array)
+	{
+		$input = unserialize($array);
+		
+		$tanggal_awal		=	$input['tanggal_awal'];
+		$tanggal_akhir		=	$input['tanggal_akhir'];
+		$produk 			=	$input['produk'];
+		$koefisien_alpha_beta = $input['koefisien_alpha_beta'];
+        $ketetapan_nilai_peramalan = isset($input['ketetapan_nilai_peramalan'])?$input['ketetapan_nilai_peramalan']:null;
 
 		$periode 			=	array();
 		$aktual		 		=	array();
@@ -858,7 +1010,7 @@ class PeramalanController extends Controller
 		$pe_des 			=	0;
 
 
-		$des 				=	$this->forecastingDes($tanggal_awal,$tanggal_akhir,$produk);
+		$des 				=	$this->forecastingDes($input);
 
 		if(isset($des))
 		{
@@ -874,7 +1026,9 @@ class PeramalanController extends Controller
 				$pe_des 	+=	$val['PE'];
 			}
 
-			return view('peramalan.detail-des',compact('des','periode','aktual','peramalan_des','length_des','mad_des','pe_des','tanggal_awal','tanggal_akhir','produk'));
+			$alpha_des = $des[0]['alpha'];
+
+			return view('peramalan.detail-des',compact('des','periode','aktual','peramalan_des','length_des','mad_des','pe_des','tanggal_awal','tanggal_akhir','produk','koefisien_alpha_beta','ketetapan_nilai_peramalan','alpha_des'));
 		}
 		else
 		{
@@ -884,10 +1038,14 @@ class PeramalanController extends Controller
 		}
 	}
 
-	public function detailDes(Request $request, $produk, $date_from, $date_to)
+	public function detailDes(Request $request, $array)
 	{
-		$date_from=date('Y-m-d',strtotime($date_from));
-		$date_to=date('Y-m-d',strtotime($date_to));
+		$input = unserialize($array);
+		$date_from=date('Y-m-d',strtotime($input['tanggal_awal']));
+		$date_to=date('Y-m-d',strtotime($input['tanggal_akhir']));
+		$produk = $input['produk'];
+		$koefisien_alpha_beta = $input['koefisien_alpha_beta'];
+		$ketetapan_nilai_peramalan = $input['ketetapan_nilai_peramalan'];
 
 		if (env('DB_CONNECTION') == 'pgsql') {
 			$data_penjualan=RawDatum::select(DB::raw('extract("week" from tgl_transaksi) as minggu,sum(pasir) as pasir,sum(gendol) as gendol,sum(abu) as abu, sum(split2_3) as split2_3, sum(split1_2) as split1_2, sum(lpa) as lpa'))
@@ -905,7 +1063,7 @@ class PeramalanController extends Controller
    //  	// ->groupby('tgl_transaksi')
 			// ->groupBy(DB::raw('extract(week from tgl_transaksi),extract(year from tgl_transaksi)'))
 			// ->get();
-			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
+			$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split1_2)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 			->where('tgl_transaksi','>=',$date_from)
 			->where('tgl_transaksi','<=',$date_to)
     	// ->groupby('tgl_transaksi')
@@ -926,7 +1084,7 @@ class PeramalanController extends Controller
 		foreach($data_penjualan as $key => $val)
 		{
 			array_push($minggu,$val->minggu);
-			switch($produk)
+			switch($input['produk'])
 			{
 				case 'abu':
 				$subtotal = floatval($val->abu);
@@ -979,7 +1137,7 @@ class PeramalanController extends Controller
 
 					$at[$i][$j+1]=(2*$s1[$i][$j+1])-$s2[$i][$j+1];
 					$bt[$i][$j+1]=($alpha[$i]/(1-$alpha[$i]))*($s1[$i][$j+1]-$s2[$i][$j+1]);
-					$F[$i][$j+1]=$at[$i][$j+1]+$bt[$i][$j+1];
+					$F[$i][$j+1]=$at[$i][$j]+$bt[$i][$j];
 
 					$MAD[$i][$j+1]=$X[$j+1]==0?0:abs($X[$j+1]-$F[$i][$j+1]);
 					$PE[$i][$j+1]=$X[$j+1] == 0 ? 0 : abs((($X[$j+1] - $F[$i][$j+1]) / $X[$j+1]) * 100);
@@ -999,9 +1157,18 @@ class PeramalanController extends Controller
 			$MAPE[$i] = array_sum($PE[$i])/(count($periode));
 			$MADTotal[$i]=array_sum($MAD[$i])/(count($periode));
 		}
+		// dd(array_search(min($MADTotal),$MADTotal));
 
-		$bestAlphaIndex = array_search(min($MAPE), $MAPE);
+		// $bestAlphaIndex = array_search(min($MAPE), $MAPE);
+		if($input['ketetapan_nilai_peramalan'] == 'mape')
+		{
+			$bestAlphaIndex = array_search(min($MAPE), $MAPE); 
+		}
+		else
+		{
+			$bestAlphaIndex = array_search(min($MADTotal), $MADTotal); 
+		}
         // dd($bestAlphaIndex);
-		return view('peramalan.mape-des',compact('MAPE','bestAlphaIndex','alpha','MADTotal','produk','date_from','date_to'));
+		return view('peramalan.mape-des',compact('MAPE','bestAlphaIndex','alpha','MADTotal','produk','date_from','date_to','koefisien_alpha_beta','ketetapan_nilai_peramalan'));
 	}
 }

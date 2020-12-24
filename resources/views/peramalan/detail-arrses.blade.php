@@ -6,6 +6,17 @@
 		display: none;
 	}
 </style>
+@php
+$array = array();
+$array['produk'] = $produk;
+$array['tanggal_awal'] = $tanggal_awal;
+$array['tanggal_akhir'] = $tanggal_akhir;
+$array['koefisien_alpha_beta'] = $koefisien_alpha_beta;
+if($koefisien_alpha_beta !== 'rumus')
+{
+	$array['ketetapan_nilai_peramalan'] = $ketetapan_nilai_peramalan;
+} 
+@endphp
 
 <div class="bg-body-light">
 	<div class="content content-full">
@@ -25,6 +36,26 @@
 				<h4 class="font-w400">Peramalan Produk {{column_name($produk)}} dengan Metode ARRSES</h4>
 				<p>Tanggal Minggu Awal Pencarian : {{ $tanggal_awal }}</p>
 				<p>Tanggal Minggu Akhir Pencarian : {{ date('d-m-Y',strtotime('-6 days',strtotime($tanggal_akhir))) }}</p>
+				<p>Koefisien Alpha / Beta : 
+					@if(isset($koefisien_alpha_beta) && !empty($koefisien_alpha_beta))
+					@if($koefisien_alpha_beta == 'random')
+					<span class="badge badge-primary">Random (0,01 sd 0,99)</span> = ({{ $beta_arrses }})
+					@else
+					<span class="badge badge-info">Periode Uji (2 / (n+1))</span>
+					@endif
+					@endif
+				</p>
+				@if(isset($koefisien_alpha_beta) && !empty($koefisien_alpha_beta))
+				@if($koefisien_alpha_beta == 'random')
+				<p>Ketetapan Nilai Peramalan : 
+					@if($ketetapan_nilai_peramalan == 'mape')
+					<span class="badge badge-primary">MAPE</span>
+					@else
+					<span class="badge badge-success">MAD</span>
+					@endif
+				</p>
+				@endif
+				@endif
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="table-responsive">
@@ -73,7 +104,7 @@
 									<td>{{$pe_arrses}}</td>
 								</tr>
 								<tr>
-									<td colspan="7">Nilai</td>
+									<td colspan="7">Nilai Rata - Rata</td>
 									<td>{{number_format(($mad_arrses / $length_arrses),2)}}</td>
 									<td>{{number_format(($pe_arrses / $length_arrses),2)}} %</td>
 								</tr>
@@ -90,7 +121,11 @@
 										<span class="badge badge-primary" style="background-color: #8b0000">BURUK</span>
 										@endif
 									</td>
-									<td><a href="{{url('peramalan/mape-arrses/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-info">Detail</a></td>
+									<td>
+									@if($koefisien_alpha_beta !== 'rumus')
+									<a href="{{url('peramalan/mape-arrses/'.serialize($array))}}" class="btn btn-info">Detail</a>
+									@endif
+									</td>
 								</tr>
 							</tfoot>
 						</table>
@@ -107,7 +142,7 @@
 				<div class="row" style="margin-bottom: 0.2em">
 					<div class="col-md-12 text-right">
 						<a href="{{url('/peramalan')}}" class="btn btn-success">Kembali ke Cari</a>&nbsp
-						<a href="{{url('peramalan/search/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-outline-success">Sebelumnya</a>
+						<a href="{{url('peramalan/search/'.serialize($array))}}" class="btn btn-outline-success">Sebelumnya</a>
 					</div>
 				</div>
 			</div>

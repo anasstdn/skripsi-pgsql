@@ -6,6 +6,17 @@
 		display: none;
 	}
 </style>
+@php
+$array = array();
+$array['produk'] = $produk;
+$array['tanggal_awal'] = $date_from;
+$array['tanggal_akhir'] = $date_to;
+$array['koefisien_alpha_beta'] = $koefisien_alpha_beta;
+if($koefisien_alpha_beta !== 'rumus')
+{
+	$array['ketetapan_nilai_peramalan'] = $ketetapan_nilai_peramalan;
+} 
+@endphp
 
 <div class="bg-body-light">
 	<div class="content content-full">
@@ -45,6 +56,40 @@
 					<span>{{$alpha[$bestAlphaIndex]}} &nbsp / &nbsp{{round($MAPE[$bestAlphaIndex],4)}} %</span>
 				</div>
 			</div>
+			<div class="row col-lg-6" style="margin-bottom:1em;font-family: sans-serif;font-weight: bold">
+					<div class="col-lg-7">
+						<span>Koefisien Alpha / Beta</span>
+					</div>
+					<div class="col-lg-1">
+						:
+					</div>
+					<div class="col-lg-4" style="text-align:left">
+						<span>@if(isset($koefisien_alpha_beta) && !empty($koefisien_alpha_beta))
+							@if($koefisien_alpha_beta == 'random')
+							<span class="badge badge-primary">Random (0,01 sd 0,99)</span>
+							@else
+							<span class="badge badge-info">Periode Uji (2 / (n+1))</span>
+							@endif
+						@endif</span>
+					</div>
+				</div>
+
+				<div class="row col-lg-6" style="margin-bottom:1em;font-family: sans-serif;font-weight: bold">
+					<div class="col-lg-7">
+						<span>Ketetapan Nilai Peramalan</span>
+					</div>
+					<div class="col-lg-1">
+						:
+					</div>
+					<div class="col-lg-4" style="text-align:left">
+						<span>
+							@if($ketetapan_nilai_peramalan == 'mape')
+							<span class="badge badge-primary">MAPE</span>
+							@else
+							<span class="badge badge-success">MAD</span>
+						@endif</span>
+					</div>
+				</div>
 			<div class="row">
 				<div class="col-lg-12">
 					<div class="table-responsive">
@@ -87,7 +132,7 @@
 			<div class="row" style="margin-bottom: 0.2em">
 					<div class="col-md-12 text-right">
 						<a href="{{url('/peramalan')}}" class="btn btn-success">Kembali ke Cari</a>&nbsp
-						<a href="{{url('peramalan/detail-des/'.$produk.'/'.$date_from.'/'.$date_to)}}" class="btn btn-outline-success">Sebelumnya</a>
+						<a href="{{url('peramalan/detail-des/'.serialize($array))}}" class="btn btn-outline-success">Sebelumnya</a>
 					</div>
 				</div>
 		</div>

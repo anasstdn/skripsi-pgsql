@@ -74,6 +74,11 @@ class LoginController extends Controller
         // {
         //     Session::put('locale', setting('language_setting'));
         // }
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        test_api($username,$password);
+
         $pesan='';
         $pesan.='Pengguna '.strtoupper(strtolower (Auth::user()->name)).'';
         $pesan.='<br>Anda melakukan login ke sistem pada '.date('d-m-Y H:i:s');
@@ -84,6 +89,10 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $token = \Auth::user()->api_token;
+        $url = "localhost:8000/api/v1/logout";
+        $get_data = get_data_with_param($data = array(), $token, $url);
+
         $this->logLogoutDetails(Auth::user());
 
         $this->guard()->logout();

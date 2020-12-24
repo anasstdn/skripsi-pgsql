@@ -270,7 +270,7 @@ Route::prefix('laporan')->group(function() {
 
 Route::prefix('grafik')->group(function() {
     Route::get('/', 'GrafikController@index');
-    Route::get('/get-chart', 'GrafikController@getChart');
+    Route::get('/get-chart', 'GrafikController@getChart1');
 });
 
 Route::prefix('recycle-bin')->group(function() {
@@ -298,10 +298,15 @@ Route::prefix('peramalan')->group(function() {
     Route::get('/', 'PeramalanController@index');
     Route::match(['get','post'],'/cari', 'PeramalanController@cari');
     Route::match(['get','post'],'/get-week', 'PeramalanController@getWeek');
-    Route::get('/search/{produk}/{tanggal_awal}/{tanggal_akhir}', 'PeramalanController@search');
-    Route::get('/detail-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses1');
-    Route::get('/mape-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses');
-    Route::get('/detail-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes1');
-    Route::get('/mape-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes');
+    Route::get('/search/{produk}', 'PeramalanController@search1');
+    // Route::get('/detail-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses1');
+    Route::get('/detail-arrses/{array}','PeramalanController@detailArrses1');
+    // Route::get('/detail-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses2');
+    // Route::get('/mape-arrses/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailArrses');
+    Route::get('/mape-arrses/{array}','PeramalanController@detailArrses');
+    // Route::get('/detail-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes1');
+    Route::get('/detail-des/{array}','PeramalanController@detailDes1');
+    // Route::get('/mape-des/{produk}/{tgl_awal}/{tgl_akhir}','PeramalanController@detailDes');
+    Route::get('/mape-des/{array}','PeramalanController@detailDes');
 });
 

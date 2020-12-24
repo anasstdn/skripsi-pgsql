@@ -32,7 +32,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-
+        
         $total_transaksi            =   RawDatum::select(\DB::raw('count(id) as total'))->first();
 
         $total_transaksi_tahun_ini  =   RawDatum::select(\DB::raw('count(id) as total'))

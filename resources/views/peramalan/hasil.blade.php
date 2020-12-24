@@ -6,6 +6,17 @@
 		display: none;
 	}
 </style>
+@php
+$array = array();
+$array['produk'] = $produk;
+$array['tanggal_awal'] = $tanggal_awal;
+$array['tanggal_akhir'] = $tanggal_akhir;
+$array['koefisien_alpha_beta'] = $koefisien_alpha_beta;
+if($koefisien_alpha_beta !== 'rumus')
+{
+	$array['ketetapan_nilai_peramalan'] = $ketetapan_nilai_peramalan;
+} 
+@endphp
 
 <div class="bg-body-light">
 	<div class="content content-full">
@@ -25,6 +36,26 @@
 				<h4 class="font-w400">Peramalan Produk {{column_name($produk)}}</h4>
 				<p>Tanggal Minggu Awal Pencarian : {{ $tanggal_awal }}</p>
 				<p>Tanggal Minggu Akhir Pencarian : {{ date('d-m-Y',strtotime('-6 days',strtotime($tanggal_akhir))) }}</p>
+				<p>Koefisien Alpha / Beta : 
+					@if(isset($koefisien_alpha_beta) && !empty($koefisien_alpha_beta))
+					@if($koefisien_alpha_beta == 'random')
+					<span class="badge badge-primary">Random (0,01 sd 0,99)</span>
+					@else
+					<span class="badge badge-info">Periode Uji (2 / (n+1))</span>
+					@endif
+					@endif
+				</p>
+				@if(isset($koefisien_alpha_beta) && !empty($koefisien_alpha_beta))
+				@if($koefisien_alpha_beta == 'random')
+				<p>Ketetapan Nilai Peramalan : 
+					@if($ketetapan_nilai_peramalan == 'mape')
+					<span class="badge badge-primary">MAPE</span>
+					@else
+					<span class="badge badge-success">MAD</span>
+					@endif
+				</p>
+				@endif
+				@endif
 				<div class="row">
 					<div class="col-lg-12">
 						<table class="table table-bordered">
@@ -32,8 +63,8 @@
 								<tr>
 									<th>Minggu</th>
 									<th>Aktual</th>
-									<th>ARRSES</th>
-									<th>DES</th>
+									<th>ARRSES (beta = {{ $beta_arrses }})</th>
+									<th>DES (alpha = {{ $alpha_des }})</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -92,9 +123,25 @@
 									</td>
 								</tr>
 								<tr>
+									<td colspan="2">Jumlah MAD</td>
+									<td>{{$mad_arrses}}</td>
+									<td>{{$mad_des}}</td>
+								</tr>
+								<tr>
+									<td colspan="2">Rata - rata MAD</td>
+									<td>{{number_format(($mad_arrses / $length_arrses),3)}}</td>
+									<td>{{number_format(($mad_des / $length_arrses),3)}}</td>
+								</tr>
+								<tr>
 									<td colspan="2">Detail</td>
-									<td><a href="{{url('peramalan/detail-arrses/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-info">Detail ARRSES</a></td>
-									<td><a href="{{url('peramalan/detail-des/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-success">Detail DES</a></td>
+									<td>
+										{{-- <a href="{{url('peramalan/detail-arrses/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-info">Detail ARRSES</a> --}}
+										<a href="{{url('peramalan/detail-arrses/'.serialize($array))}}" class="btn btn-info">Detail ARRSES</a>
+									</td>
+									<td>
+										{{-- <a href="{{url('peramalan/detail-des/'.$produk.'/'.$tanggal_awal.'/'.$tanggal_akhir)}}" class="btn btn-success">Detail DES</a> --}}
+										<a href="{{url('peramalan/detail-des/'.serialize($array))}}" class="btn btn-success">Detail DES</a>
+									</td>
 								</tr>
 							</tfoot>
 						</table>

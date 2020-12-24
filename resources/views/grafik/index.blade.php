@@ -148,7 +148,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(171, 227, 125, 1)',
-					data: total
+					data: total,
+					lineTension: 0,
 				},
 				]
 			};
@@ -201,7 +202,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(171, 227, 125, 1)',
-					data: pasir
+					data: pasir,
+					lineTension: 0,
 				},
 				{
 					label: 'Abu',
@@ -212,7 +214,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(220,220,220,1)',
-					data: abu
+					data: abu,
+					lineTension: 0,
 				},
 				{
 					label: 'Gendol',
@@ -223,7 +226,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(0,128,128,1)',
-					data: gendol
+					data: gendol,
+					lineTension: 0,
 				},
 				{
 					label: 'Split 1/2',
@@ -234,7 +238,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(32,178,170,1)',
-					data: split1
+					data: split1,
+					lineTension: 0,
 				},
 				{
 					label: 'Split 2/3',
@@ -245,7 +250,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(139,69,19,1)',
-					data: split2
+					data: split2,
+					lineTension: 0,
 				},
 				{
 					label: 'LPA',
@@ -256,7 +262,8 @@
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: 'rgba(176,196,222,1)',
-					data: lpa
+					data: lpa,
+					lineTension: 0,
 				},
 				]
 			};
