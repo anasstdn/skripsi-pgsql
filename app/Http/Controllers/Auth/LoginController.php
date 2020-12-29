@@ -90,7 +90,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $token = \Auth::user()->api_token;
-        $url = "localhost:8000/api/v1/logout";
+        $url = "lumen.test/api/v1/logout";
         $get_data = get_data_with_param($data = array(), $token, $url);
 
         $this->logLogoutDetails(Auth::user());

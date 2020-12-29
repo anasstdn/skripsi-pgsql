@@ -37,7 +37,7 @@ class GrafikController extends Controller
 		$all_data=$request->all();
 		$data['tahun'] = $all_data['tahun'];
         $token = \Auth::user()->api_token;
-        $url = "localhost:8000/api/v1/transaksi";
+        $url = "lumen.test/api/v1/transaksi";
         $get_data = get_data_with_param($data, $token, $url);
 
         $data=array(

@@ -83,7 +83,7 @@ class PeramalanController extends Controller
 		$array = unserialize($array);
 		
 		$token = \Auth::user()->api_token;
-        $url = "localhost:8000/api/v1/peramalan";
+        $url = "lumen.test/api/v1/peramalan";
         $get_data = get_data_with_param($array, $token, $url);
 
         if($get_data == null)
