@@ -288,7 +288,6 @@ class TransaksiController extends Controller
 
     public function import(Request $request)
     {
-
     	DB::table('raw_data')->delete();
     	DB::statement("ALTER TABLE raw_data AUTO_INCREMENT = 1");
 

@@ -167,28 +167,34 @@ class GrafikController extends Controller
 		// array_push($total_transaksi,$data_penjualan->Nov);
 		// array_push($total_transaksi,$data_penjualan->Dec);
 
-		$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu, COUNT(*) as total'))
+		$data_penjualan 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%Y-%m") as bulan, COUNT(*) as total'))
 		->whereYear('tgl_transaksi','=',$all_data['tahun'])
-		->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+		->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%Y-%m")'))
 		->orderby('tgl_transaksi','ASC')
 		->get();
 
-		$minggu = array();
+		$bulan = array();
+		$transaksi_bulan = array();
 
 		if(isset($data_penjualan) && !$data_penjualan->isEmpty())
 		{
 			foreach($data_penjualan as $key => $val)
 			{
-				array_push($minggu,$val->minggu);
-				array_push($total_transaksi,$val->total);
+				$transaksi_bulan[] = array(
+					'bulan' => date('Y-m',strtotime($val->bulan)),
+					'total_transaksi' => $val->total,
+				);				
 			}
 		}
 
-		$penjualan_barang 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x") as minggu,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
+		$total_transaksi = totalData($transaksi_bulan,$date_from,$date_to);
+
+		$penjualan_barang 	=	RawDatum::select(DB::raw('DATE_FORMAT(tgl_transaksi, "%Y-%m") as bulan,IF(sum(pasir) IS NULL,0,sum(pasir)) as pasir,IF(sum(gendol) IS NULL, 0, sum(gendol)) as gendol,IF(sum(abu) IS NULL,0,sum(abu)) as abu, IF(sum(split2_3) IS NULL,0,sum(split2_3)) as split2_3, IF(sum(split1_2) IS NULL, 0, sum(split2_3)) as split1_2, IF(sum(lpa) IS NULL,0,sum(lpa)) as lpa'))
 		->whereYear('tgl_transaksi','=',$all_data['tahun'])
-		->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%v/%x")'))
+		->groupBy(DB::raw('DATE_FORMAT(tgl_transaksi, "%Y-%m")'))
 		->orderby('tgl_transaksi','ASC')
 		->get();
+
 
 		$total_pasir = array();
 		$total_abu = array();
@@ -201,15 +207,39 @@ class GrafikController extends Controller
 		{
 			foreach($penjualan_barang as $key => $val)
 			{
-				array_push($total_pasir,$val->pasir);
-				array_push($total_abu,$val->abu);
-				array_push($total_gendol,$val->gendol);
-				array_push($total_split_1,$val->split1_2);
-				array_push($total_split_2,$val->split2_3);
-				array_push($total_lpa,$val->lpa);
+				$total_pasir[] = array(
+					'bulan' => $val->bulan,
+					'total_transaksi' => $val->pasir,
+				);
+				$total_abu[] = array(
+					'bulan' => $val->bulan,
+					'total_transaksi' => $val->abu,
+				);
+				$total_gendol[] = array(
+					'bulan' => $val->bulan,
+					'total_transaksi' => $val->gendol,
+				);
+				$total_split_1[] = array(
+					'bulan' => $val->bulan,
+					'total_transaksi' => $val->split1_2,
+				);
+				$total_split_2[] = array(
+					'bulan' => $val->bulan,
+					'total_transaksi' => $val->split2_3,
+				);
+				$total_lpa[] = array(
+					'bulan' => $val->bulan,
+					'total_transaksi' => $val->lpa,
+				);
 			}
 		}
 
+		$total_pasir = totalData($total_pasir,$date_from,$date_to);
+		$total_abu = totalData($total_abu,$date_from,$date_to);
+		$total_gendol = totalData($total_gendol,$date_from,$date_to);
+		$total_split_1 = totalData($total_split_1,$date_from,$date_to);
+		$total_split_2 = totalData($total_split_2,$date_from,$date_to);
+		$total_lpa = totalData($total_lpa,$date_from,$date_to);
 
 		// $total_pasir=$this->totalPasir($all_data['tahun']);
 
@@ -270,8 +300,8 @@ class GrafikController extends Controller
 		$label_pie=['Pasir','Abu','Pasir Gendol','Split 1/2','Split 2/3','LPA','Campur'];
 
 		$data=array(
-			'bulan'=>$bulan,
-			'minggu' => $minggu,
+			// 'bulan'=>$bulan,
+			'bulan' => getMonths($date_from,$date_to),
 			'total_transaksi'=>$total_transaksi,
 			'total_pasir'=>$total_pasir,
 			'total_abu'=>$total_abu,

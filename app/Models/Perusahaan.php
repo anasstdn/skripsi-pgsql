@@ -13,35 +13,22 @@ use Illuminate\Database\Eloquent\Model;
  * Class Perusahaan
  * 
  * @property int $id
- * @property character varying|null $nama_ps
+ * @property string|null $nama_ps
  * @property string|null $alamat_ps
- * @property character varying|null $email_ps
- * @property character varying|null $fax_ps
- * @property character varying|null $telp_ps
- * @property character varying|null $website_ps
+ * @property string|null $email_ps
+ * @property string|null $fax_ps
+ * @property string|null $telp_ps
+ * @property string|null $website_ps
  * @property Carbon|null $tgl_berdiri_ps
- * @property character varying|null $flag_ksp
- * @property character varying|null $flag_ksu
- * @property timestamp without time zone|null $created_at
- * @property timestamp without time zone|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property string|null $flag_peramalan_bulanan
  *
  * @package App\Models
  */
 class Perusahaan extends Model
 {
 	protected $table = 'perusahaan';
-
-	protected $casts = [
-		'nama_ps' => 'character varying',
-		'email_ps' => 'character varying',
-		'fax_ps' => 'character varying',
-		'telp_ps' => 'character varying',
-		'website_ps' => 'character varying',
-		'flag_ksp' => 'character varying',
-		'flag_ksu' => 'character varying',
-		'created_at' => 'timestamp without time zone',
-		'updated_at' => 'timestamp without time zone'
-	];
 
 	protected $dates = [
 		'tgl_berdiri_ps'
@@ -55,7 +42,6 @@ class Perusahaan extends Model
 		'telp_ps',
 		'website_ps',
 		'tgl_berdiri_ps',
-		'flag_ksp',
-		'flag_ksu'
+		'flag_peramalan_bulanan'
 	];
 }

@@ -29,8 +29,17 @@ class PeramalanController extends Controller
 
 	public function index()
 	{
-		$this->menuAccess(\Auth::user(),'Peramalan');
-		return view('peramalan.index');
+		$data = \DB::table('perusahaan')->first('flag_peramalan_bulanan');
+
+		if($data->flag_peramalan_bulanan == 'Y')
+		{
+			return redirect('peramalan-bulanan');
+		}
+		else
+		{
+			$this->menuAccess(\Auth::user(),'Peramalan');
+			return view('peramalan.index');
+		}
 	}
 
 	public function getWeek(Request $request)

@@ -53,6 +53,19 @@
         <input type="text" class="form-control form-control-lg js-flatpickr bg-white" data-date-format="d-m-Y" id="tgl_berdiri_ps" name="tgl_berdiri_ps" placeholder="Tanggal Berdiri Perusahaan" value="{{isset($perusahaan)?isset($perusahaan->tgl_berdiri_ps)?date('d-m-Y',strtotime($perusahaan->tgl_berdiri_ps)):'':''}}">
     </div>
 </div>
+<div class="form-group row">
+  <div class="col-12">
+    <label for="profile-settings-username">Mode Peramalan&nbsp<span style="color: red">*</span></label><br/>
+    <div class="custom-control custom-radio custom-control-inline">
+      <input type="radio" class="custom-control-input" id="bulanan" value="Y" name="flag_peramalan_bulanan" {{ isset($perusahaan) && !empty($perusahaan->flag_peramalan_bulanan)?$perusahaan->flag_peramalan_bulanan == 'Y'?'checked':'':'' }}>
+      <label class="custom-control-label" for="bulanan">Bulanan</label>
+    </div>
+    <div class="custom-control custom-radio custom-control-inline">
+      <input type="radio" class="custom-control-input" id="mingguan" value="N" name="flag_peramalan_bulanan" {{ isset($perusahaan) && !empty($perusahaan->flag_peramalan_bulanan)?$perusahaan->flag_peramalan_bulanan == 'N'?'checked':'':'' }}>
+      <label class="custom-control-label" for="mingguan">Mingguan</label>
+    </div>
+  </div>
+</div>
 {{-- @php
 $flag_mode=null;
 if(isset($perusahaan->flag_ksp) && isset($perusahaan->flag_ksu))

@@ -86,7 +86,7 @@
         Chart.defaults.global.defaultFontStyle              = '600';
         Chart.defaults.scale.gridLines.color                = "rgba(0,0,0,.05)";
         Chart.defaults.scale.gridLines.zeroLineColor        = "rgba(0,0,0,.1)";
-        Chart.defaults.scale.ticks.beginAtZero              = true;
+        Chart.defaults.scale.ticks.beginAtZero              = false;
         Chart.defaults.global.elements.line.borderWidth     = 2;
         Chart.defaults.global.elements.point.radius         = 4;
         Chart.defaults.global.elements.point.hoverRadius    = 6;
@@ -123,8 +123,8 @@
 				type: 'GET',
 				data: {tahun:$('#tahun').val()},
 				success:function(data){      
-					chart_penjualan(data.minggu,data.total_transaksi);
-					chart_total(data.minggu,data.total_pasir,data.total_abu,data.total_gendol,data.total_split_1,data.total_split_2,data.total_lpa);
+					chart_penjualan(data.bulan,data.total_transaksi);
+					chart_total(data.bulan,data.total_pasir,data.total_abu,data.total_gendol,data.total_split_1,data.total_split_2,data.total_lpa);
 					chart_pie(data.label_pie,data.graph_pie);
 					$('.ajax-loader').fadeOut();
 				},
@@ -168,7 +168,7 @@
 									fontStyle: 'bold'
 								},
 								ticks: {
-									autoSkip: true,
+									autoSkip: false,
 									maxTicksLimit: 10,
 									stepSize: 3
 								},
@@ -282,7 +282,7 @@
 									fontStyle: 'bold'
 								},
 								ticks: {
-									autoSkip: true,
+									autoSkip: false,
 									maxTicksLimit: 10,
 									stepSize: 3
 								},

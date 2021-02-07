@@ -411,4 +411,43 @@ function getIsoWeeksInYear($year) {
     return ($date->format("W") === "53" ? 53 : 52);
 }
 
+function getMonths($datestart, $dateend)
+{
+    $start = $month = strtotime($datestart);
+    $end = strtotime($dateend);
+    $bulan = array();
+    while($month <= $end)
+    {
+       $bulan[]= date('Y-m', $month);
+       $month = strtotime("+1 month", $month);
+   }
+
+   return $bulan;
+}
+
+function totalData($array,$date_from,$date_to)
+{
+    $total_transaksi = array();
+    foreach (getMonths($date_from,$date_to) as $i => $value) {
+        foreach($array as $j => $data)
+        {
+            if($value == $data['bulan'])
+            {
+                $total_transaksi[$i] = $data['total_transaksi'];
+                break;
+            }
+            else
+            {
+                $total_transaksi[$i] = 0;
+            }
+        }
+    }
+    return $total_transaksi;
+}
+
+function total_days($month_start,$year_start)
+{
+    return cal_days_in_month(0,$month_start,$year_start);
+}
+
 ?>

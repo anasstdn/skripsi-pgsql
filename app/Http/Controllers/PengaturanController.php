@@ -101,6 +101,7 @@ class PengaturanController extends Controller
 					'fax_ps'			=>  $all_data['fax_ps'],
 					'website_ps'		=>  $all_data['website_ps'],
 					'tgl_berdiri_ps'	=>  date('Y-m-d',strtotime($all_data['tgl_berdiri_ps'])),
+					'flag_peramalan_bulanan' => $all_data['flag_peramalan_bulanan'],
 				);
 
 				$get=Perusahaan::orderby('id','asc')->first();
@@ -165,7 +166,7 @@ class PengaturanController extends Controller
 			DB::commit();
 		}
 
-		return redirect('/pengaturan');
+		return redirect()->back();
 	}
 
 	public function createConfig()
